@@ -1,0 +1,44 @@
+[
+  {
+    "id": "tools-list",
+    "description": "Server exposes exactly the two-tool contract (PRD §6)",
+    "type": "listTools",
+    "expect": { "toolNames": ["execute_sql", "search_objects"] }
+  },
+  {
+    "id": "execute-sql-basic-select",
+    "description": "A trivial portable SELECT succeeds and returns columns/rows JSON",
+    "type": "callTool",
+    "tool": "execute_sql",
+    "arguments": { "sql": "SELECT 1 AS one" },
+    "expect": {
+      "isError": false,
+      "textIncludes": ["1 rows"],
+      "jsonEquals": { "columns": ["one"], "rows": [{ "one": 1 }] }
+    }
+  },
+  {
+    "id": "execute-sql-invalid-statement",
+    "description": "An invalid SQL statement is reported as a tool error",
+    "type": "callTool",
+    "tool": "execute_sql",
+    "arguments": { "sql": "SELECT FROM WHERE ???" },
+    "expect": { "isError": true }
+  },
+  {
+    "id": "search-objects-list-no-error",
+    "description": "search_objects with no table lists tables without error",
+    "type": "callTool",
+    "tool": "search_objects",
+    "arguments": {},
+    "expect": { "isError": false, "jsonHasKey": "tables" }
+  },
+  {
+    "id": "search-objects-unknown-table",
+    "description": "search_objects on an unknown table returns the mandated error prefix (PRD §6.2)",
+    "type": "callTool",
+    "tool": "search_objects",
+    "arguments": { "table": "__db_mcp_conformance_missing_table__" },
+    "expect": { "isError": true, "textStartsWith": "unknown table:" }
+  }
+]

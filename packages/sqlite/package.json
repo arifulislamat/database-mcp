@@ -1,0 +1,24 @@
+{
+  "name": "@db-mcp/sqlite",
+  "version": "0.1.0",
+  "description": "MCP server exposing execute_sql and search_objects for SQLite databases.",
+  "type": "module",
+  "bin": {
+    "db-mcp": "./dist/cli.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "node --test dist/**/*.test.js"
+  },
+  "dependencies": {
+    "@db-mcp/core": "0.1.0",
+    "better-sqlite3": "^12.11.1"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.11",
+    "typescript": "^5.6.0"
+  },
+  "license": "MIT"
+}

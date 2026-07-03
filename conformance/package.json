@@ -1,0 +1,10 @@
+{
+  "name": "db-mcp-conformance",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Language-agnostic conformance suite for db-mcp servers (PRD §10). Connects to a server-under-test over stdio and runs shared cases.json.",
+  "type": "module",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0"
+  }
+}
