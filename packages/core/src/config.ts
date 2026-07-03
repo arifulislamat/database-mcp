@@ -62,6 +62,8 @@ function toBool(value: unknown, fallback: boolean): boolean {
   if (value === undefined) return fallback;
   if (typeof value === "boolean") return value;
   if (typeof value === "string") {
+    // Accept both word ("true"/"false") and numeric ("1"/"0") forms
+    // symmetrically; anything else falls back to the default.
     const normalized = value.toLowerCase();
     if (normalized === "true" || normalized === "1") return true;
     if (normalized === "false" || normalized === "0") return false;
