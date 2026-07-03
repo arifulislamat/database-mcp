@@ -61,7 +61,12 @@ function readConfigFile(path: string | boolean | undefined): ConfigFileShape {
 function toBool(value: unknown, fallback: boolean): boolean {
   if (value === undefined) return fallback;
   if (typeof value === "boolean") return value;
-  if (typeof value === "string") return value.toLowerCase() === "true" || value === "1";
+  if (typeof value === "string") {
+    const normalized = value.toLowerCase();
+    if (normalized === "true" || normalized === "1") return true;
+    if (normalized === "false" || normalized === "0") return false;
+    return fallback;
+  }
   return fallback;
 }
 

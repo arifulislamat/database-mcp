@@ -52,7 +52,7 @@ export function isReadOnlyStatement(sql: string): boolean {
 
   // PRAGMA statements that assign a value (e.g. `PRAGMA foreign_keys = OFF`)
   // mutate connection state and must not be treated as reads.
-  if (/^PRAGMA\b/i.test(cleaned) && /=/.test(cleaned.split(/[;\n]/)[0] ?? "")) {
+  if (/^PRAGMA\b/i.test(cleaned) && /=/.test(cleaned.split(/[;\n]/)[0])) {
     return false;
   }
 

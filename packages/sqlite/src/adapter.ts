@@ -18,6 +18,29 @@ export interface SqliteAdapterOptions {
 }
 
 /**
+ * Quotes a SQLite identifier (table/index/column name) for safe
+ * interpolation into DDL/PRAGMA statements that don't support bind
+ * parameters. Doubling embedded double-quotes is the standard SQL identifier
+ * escape and prevents identifiers containing `"` from breaking out of the
+ * quoting.
+ */
+function quoteIdentifier(identifier: string): string {
+  return `"${identifier.replace(/"/g, '""')}"`;
+}
+
+/** Extracts column names from a statement's declared columns, or the first row as a fallback. */
+function extractColumnNames(
+  stmt: Database.Statement,
+  rows: Record<string, unknown>[],
+): string[] {
+  const declared = stmt.columns?.().map((c) => c.name);
+  if (declared && declared.length > 0) {
+    return declared;
+  }
+  return rows.length > 0 ? Object.keys(rows[0]) : [];
+}
+
+/**
  * SQLite family adapter (PRD §7). SQLite is embedded — there is no
  * host/port/user/password, only a file path. Introspection uses
  * `sqlite_master` and `PRAGMA`, never `information_schema`.
@@ -70,7 +93,7 @@ export class SqliteAdapter implements DatabaseAdapter {
         }
         rows.push(row as Record<string, unknown>);
       }
-      const columns = rows.length > 0 ? Object.keys(rows[0]!) : (stmt.columns?.() ?? []).map((c) => c.name);
+      const columns = extractColumnNames(stmt, rows);
       result = { columns, rows, rowCount: rows.length, truncated };
     } else {
       const info = stmt.run();
@@ -95,7 +118,7 @@ export class SqliteAdapter implements DatabaseAdapter {
     return tables.map(({ name }) => {
       let estimatedRows: number | null = null;
       try {
-        const row = db.prepare(`SELECT COUNT(*) AS count FROM "${name}"`).get() as
+        const row = db.prepare(`SELECT COUNT(*) AS count FROM ${quoteIdentifier(name)}`).get() as
           | { count: number }
           | undefined;
         estimatedRows = row?.count ?? null;
@@ -116,7 +139,7 @@ export class SqliteAdapter implements DatabaseAdapter {
       throw new UnknownTableError(table);
     }
 
-    const columnRows = db.prepare(`PRAGMA table_info("${table}")`).all() as {
+    const columnRows = db.prepare(`PRAGMA table_info(${quoteIdentifier(table)})`).all() as {
       name: string;
       type: string;
       notnull: number;
@@ -132,13 +155,13 @@ export class SqliteAdapter implements DatabaseAdapter {
       default: c.dflt_value,
     }));
 
-    const indexListRows = db.prepare(`PRAGMA index_list("${table}")`).all() as {
+    const indexListRows = db.prepare(`PRAGMA index_list(${quoteIdentifier(table)})`).all() as {
       name: string;
       unique: number;
     }[];
 
     const indexes: IndexInfo[] = indexListRows.map((idx) => {
-      const indexInfoRows = db.prepare(`PRAGMA index_info("${idx.name}")`).all() as {
+      const indexInfoRows = db.prepare(`PRAGMA index_info(${quoteIdentifier(idx.name)})`).all() as {
         name: string;
       }[];
       return {
@@ -148,7 +171,7 @@ export class SqliteAdapter implements DatabaseAdapter {
       };
     });
 
-    const foreignKeyRows = db.prepare(`PRAGMA foreign_key_list("${table}")`).all() as {
+    const foreignKeyRows = db.prepare(`PRAGMA foreign_key_list(${quoteIdentifier(table)})`).all() as {
       id: number;
       table: string;
       from: string;

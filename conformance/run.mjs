@@ -48,6 +48,13 @@ function parseToolText(text) {
   }
 }
 
+/**
+ * Structural equality via JSON serialization. Sufficient for this suite's
+ * fixtures (plain objects/arrays with primitive values and stable key
+ * insertion order from `JSON.parse`), but note it is order-sensitive for
+ * object keys and cannot distinguish a missing key from one explicitly set
+ * to `undefined` (both serialize away). Do not reuse for arbitrary payloads.
+ */
 function deepEqual(a, b) {
   return JSON.stringify(a) === JSON.stringify(b);
 }
