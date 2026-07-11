@@ -16,7 +16,10 @@ Two tools, guardrails on by default.
 }
 ```
 
-Or with environment variables instead of flags: set `SQLITE_PATH`.
+Or with environment variables instead of flags: set `SQLITE_PATH`. Or keep
+everything in a YAML file and pass only `--config /abs/path/db-mcp.yaml`
+(values support `${VAR}` env expansion; secrets support `*_file` indirection).
+`--print-config` shows the resolved config with secrets redacted.
 
 ## Tools
 

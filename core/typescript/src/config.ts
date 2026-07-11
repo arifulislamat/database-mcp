@@ -1,23 +1,66 @@
+import { readFileSync } from "node:fs";
+import { parse as parseYaml } from "yaml";
+import { Secret, registerSecret } from "./secret.js";
+
 export interface Guardrails {
   readOnly: boolean;
   maxRows: number;
   queryTimeoutMs: number;
 }
 
+/** General enough for a SQLite file path AND a networked engine. */
+export interface Connection {
+  /** Engine URI or file path. Inline credentials are discouraged. */
+  dsn?: string;
+  host?: string;
+  port?: number;
+  user?: string;
+  password?: Secret;
+  database?: string;
+}
+
 export interface Config {
-  /** How to reach the database: a file path (SQLite), URL, or DSN. */
-  dsn: string;
+  connection: Connection;
   guardrails: Guardrails;
 }
 
 export interface ConfigOptions {
+  /** Discrete env var prefix: "MYSQL" reads MYSQL_HOST, MYSQL_PASSWORD, ... */
+  envPrefix: string;
   /** Engine-specific env var for the connection target, e.g. SQLITE_PATH. */
-  dsnEnvVar: string;
+  dsnEnvVar?: string;
+}
+
+/** ${VAR} in YAML string values resolves from the environment at load time. */
+function expand(value: string, env: NodeJS.ProcessEnv, path: string): string {
+  return value.replace(/\$\{(\w+)\}/g, (_, name: string) => {
+    const v = env[name];
+    if (v === undefined) {
+      throw new Error(`config: \${${name}} referenced at '${path}' but the environment variable is not set`);
+    }
+    return v;
+  });
+}
+
+function expandDeep(node: unknown, env: NodeJS.ProcessEnv, path = ""): unknown {
+  if (typeof node === "string") return expand(node, env, path);
+  if (Array.isArray(node)) return node.map((v, i) => expandDeep(v, env, `${path}[${i}]`));
+  if (node && typeof node === "object") {
+    return Object.fromEntries(
+      Object.entries(node).map(([k, v]) => [k, expandDeep(v, env, path ? `${path}.${k}` : k)]),
+    );
+  }
+  return node;
 }
 
 /**
- * M1 config: flags > env > defaults. The full multi-source resolution
- * (--config YAML, ${VAR} expansion, *_FILE secrets) lands at M1.5.
+ * Multi-source resolution, highest precedence first:
+ *   1. flags (--dsn, --allow-write, --max-rows, --query-timeout-ms)
+ *   2. --config <path.yaml> (or DB_MCP_CONFIG), with ${VAR} expansion
+ *   3. discrete env vars (<PREFIX>_HOST, ..., plus *_FILE variants)
+ *   4. defaults
+ * Password specifically: password_file / *_PASSWORD_FILE > password / *_PASSWORD.
+ * The password is a Secret the moment it is read.
  */
 export function loadConfig(argv: string[], env: NodeJS.ProcessEnv, opts: ConfigOptions): Config {
   const flag = (name: string): string | undefined => {
@@ -25,17 +68,59 @@ export function loadConfig(argv: string[], env: NodeJS.ProcessEnv, opts: ConfigO
     return i >= 0 ? argv[i + 1] : undefined;
   };
 
-  const dsn = flag("--dsn") ?? env[opts.dsnEnvVar];
-  if (!dsn) {
-    throw new Error(`config: no database given — pass --dsn <target> or set ${opts.dsnEnvVar}`);
+  const configPath = flag("--config") ?? env.DB_MCP_CONFIG;
+  const file = configPath
+    ? (expandDeep(parseYaml(readFileSync(configPath, "utf8")), env) as Record<string, Record<string, unknown>>)
+    : {};
+  const fc = (file.connection ?? {}) as Record<string, string | number | undefined>;
+  const fg = (file.guardrails ?? {}) as Record<string, unknown>;
+  const P = opts.envPrefix;
+
+  const passwordFile = (fc.password_file as string | undefined) ?? env[`${P}_PASSWORD_FILE`];
+  const rawPassword = passwordFile
+    ? readFileSync(passwordFile, "utf8").trim()
+    : ((fc.password as string | undefined) ?? env[`${P}_PASSWORD`]);
+
+  const dsn = flag("--dsn") ?? (fc.dsn as string | undefined) ?? (opts.dsnEnvVar ? env[opts.dsnEnvVar] : undefined) ?? env[`${P}_DSN`];
+  // Inline DSN credentials are discouraged but must never leak: register them.
+  if (dsn) {
+    try {
+      const parsed = new URL(dsn);
+      if (parsed.password) registerSecret(decodeURIComponent(parsed.password));
+    } catch {
+      /* not a URL (e.g. a file path) */
+    }
   }
 
-  return {
-    dsn,
+  const num = (v: unknown): number | undefined => (v === undefined ? undefined : Number(v));
+
+  const config: Config = {
+    connection: {
+      dsn,
+      host: (fc.host as string | undefined) ?? env[`${P}_HOST`],
+      port: num(fc.port ?? env[`${P}_PORT`]),
+      user: (fc.user as string | undefined) ?? env[`${P}_USER`],
+      password: rawPassword ? new Secret(rawPassword) : undefined,
+      database: (fc.database as string | undefined) ?? env[`${P}_DATABASE`],
+    },
     guardrails: {
-      readOnly: !(argv.includes("--allow-write") || env.ALLOW_WRITE === "true"),
-      maxRows: Number(flag("--max-rows") ?? env.MAX_ROWS ?? 1000),
-      queryTimeoutMs: Number(flag("--query-timeout-ms") ?? env.QUERY_TIMEOUT_MS ?? 30000),
+      readOnly: argv.includes("--allow-write")
+        ? false
+        : typeof fg.readOnly === "boolean"
+          ? fg.readOnly
+          : env.ALLOW_WRITE !== undefined
+            ? env.ALLOW_WRITE !== "true"
+            : true,
+      maxRows: Number(flag("--max-rows") ?? fg.maxRows ?? env.MAX_ROWS ?? 1000),
+      queryTimeoutMs: Number(flag("--query-timeout-ms") ?? fg.queryTimeoutMs ?? env.QUERY_TIMEOUT_MS ?? 30000),
     },
   };
+
+  // Debug aid; goes through the redacting serializer (Secret.toJSON = "***").
+  if (argv.includes("--print-config")) {
+    console.log(JSON.stringify(config, null, 2));
+    process.exit(0);
+  }
+
+  return config;
 }
