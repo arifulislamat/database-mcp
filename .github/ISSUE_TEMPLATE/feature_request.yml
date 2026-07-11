@@ -1,0 +1,21 @@
+name: Feature request
+description: Suggest an improvement
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What are you trying to do that you can't today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+  - type: markdown
+    attributes:
+      value: >
+        Note: the two-tool contract (`execute_sql`, `search_objects`) is
+        deliberate. Proposals to add tools need a strong case for why the
+        existing surface can't express the need.

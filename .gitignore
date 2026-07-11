@@ -1,0 +1,16 @@
+.DS_STORE
+.notes
+
+# deps + build outputs
+node_modules/
+dist/
+target/
+__pycache__/
+.venv/
+
+# env + secrets
+.env
+.env.*
+
+# logs
+*.log

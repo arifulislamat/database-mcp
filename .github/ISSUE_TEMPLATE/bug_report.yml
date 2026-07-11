@@ -1,0 +1,34 @@
+name: Bug report
+description: Something doesn't work as documented
+labels: [bug]
+body:
+  - type: input
+    id: package
+    attributes:
+      label: Package
+      placeholder: "@db-mcp/sqlite 0.1.0"
+    validations:
+      required: true
+  - type: input
+    id: client
+    attributes:
+      label: MCP client
+      placeholder: "Claude Desktop / Claude Code / Cursor / VS Code"
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: Include the tool call and (sanitized!) config. Never paste credentials or full DSNs.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected vs actual behavior
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: >
+        **Security issues (credential leaks, read-only bypasses): do NOT file
+        here.** Use private vulnerability reporting — see SECURITY.md.
