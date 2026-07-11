@@ -1,0 +1,62 @@
+[
+  {
+    "name": "tables listed with estimated rows",
+    "tool": "search_objects",
+    "args": {},
+    "expect": { "isError": false, "textContains": ["users", "orders", "estimatedRows"] }
+  },
+  {
+    "name": "table described: columns",
+    "tool": "search_objects",
+    "args": { "table": "users" },
+    "expect": { "isError": false, "textContains": ["email", "columns", "indexes"] }
+  },
+  {
+    "name": "table described: foreign keys",
+    "tool": "search_objects",
+    "args": { "table": "orders" },
+    "expect": { "isError": false, "textContains": ["referencesTable", "users", "user_id"] }
+  },
+  {
+    "name": "unknown table rejected",
+    "tool": "search_objects",
+    "args": { "table": "no_such_table" },
+    "expect": { "isError": true, "textPrefix": "unknown table:" }
+  },
+  {
+    "name": "trivial read",
+    "tool": "execute_sql",
+    "args": { "sql": "SELECT id, name FROM users WHERE id = 1" },
+    "expect": { "isError": false, "summaryLine": "1 rows", "textContains": ["Tavian"] }
+  },
+  {
+    "name": "row cap truncation",
+    "tool": "execute_sql",
+    "args": { "sql": "SELECT * FROM users" },
+    "expect": { "isError": false, "summaryLine": "truncated to 3 rows" }
+  },
+  {
+    "name": "read-only rejects a plain write",
+    "tool": "execute_sql",
+    "args": { "sql": "DELETE FROM users" },
+    "expect": { "isError": true, "textPrefix": "read-only:" }
+  },
+  {
+    "name": "read-only rejects a CTE-smuggled write (session layer)",
+    "tool": "execute_sql",
+    "args": { "sql": "WITH d AS (SELECT 1) DELETE FROM users" },
+    "expect": { "isError": true, "textPrefix": "read-only:" }
+  },
+  {
+    "name": "data unchanged after blocked writes",
+    "tool": "execute_sql",
+    "args": { "sql": "SELECT count(*) AS n FROM users" },
+    "expect": { "isError": false, "summaryLine": "1 rows", "textContains": ["5"] }
+  },
+  {
+    "name": "multi-statement rejected",
+    "tool": "execute_sql",
+    "args": { "sql": "SELECT 1; SELECT 2" },
+    "expect": { "isError": true, "textPrefix": "multi-statement:" }
+  }
+]
