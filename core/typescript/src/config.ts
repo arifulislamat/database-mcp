@@ -5,24 +5,29 @@ export interface Guardrails {
 }
 
 export interface Config {
-  /** SQLite: filesystem path to the database. Generalizes per engine. */
+  /** How to reach the database: a file path (SQLite), URL, or DSN. */
   dsn: string;
   guardrails: Guardrails;
 }
 
+export interface ConfigOptions {
+  /** Engine-specific env var for the connection target, e.g. SQLITE_PATH. */
+  dsnEnvVar: string;
+}
+
 /**
- * M0.5 config: flags > env > defaults. The full multi-source resolution
- * (--config YAML, ${VAR} expansion, *_FILE secrets) lands in core at M1.5.
+ * M1 config: flags > env > defaults. The full multi-source resolution
+ * (--config YAML, ${VAR} expansion, *_FILE secrets) lands at M1.5.
  */
-export function loadConfig(argv: string[], env: NodeJS.ProcessEnv): Config {
+export function loadConfig(argv: string[], env: NodeJS.ProcessEnv, opts: ConfigOptions): Config {
   const flag = (name: string): string | undefined => {
     const i = argv.indexOf(name);
     return i >= 0 ? argv[i + 1] : undefined;
   };
 
-  const dsn = flag("--dsn") ?? env.SQLITE_PATH;
+  const dsn = flag("--dsn") ?? env[opts.dsnEnvVar];
   if (!dsn) {
-    throw new Error("config: no database given — pass --dsn /path/to.db or set SQLITE_PATH");
+    throw new Error(`config: no database given — pass --dsn <target> or set ${opts.dsnEnvVar}`);
   }
 
   return {

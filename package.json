@@ -2,11 +2,12 @@
   "name": "database-mcp",
   "private": true,
   "workspaces": [
+    "core/typescript",
     "sqlite/typescript",
     "conformance"
   ],
   "scripts": {
-    "build": "npm run build --workspaces --if-present",
+    "build": "npm run build -w @database-mcp/core && npm run build -w @database-mcp/sqlite",
     "conformance": "node conformance/run.mjs -- node sqlite/typescript/dist/index.js"
   },
   "engines": {
