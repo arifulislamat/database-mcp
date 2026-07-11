@@ -1,0 +1,15 @@
+{
+  "name": "database-mcp",
+  "private": true,
+  "workspaces": [
+    "sqlite/typescript",
+    "conformance"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "conformance": "node conformance/run.mjs -- node sqlite/typescript/dist/index.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
