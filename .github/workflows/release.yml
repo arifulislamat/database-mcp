@@ -36,7 +36,10 @@ jobs:
       - name: Upgrade npm (OIDC trusted publishing needs >= 11.5)
         run: npm install -g npm@latest
       - name: Publish
-        run: npm publish --workspace "@database-mcp/${{ steps.tag.outputs.package }}" --access public
+        # run from the package dir: npm's OIDC trusted-publishing flow does
+        # not trigger in --workspace mode
+        working-directory: ${{ steps.tag.outputs.package }}/typescript
+        run: npm publish --access public
       - name: GitHub release
         run: gh release create "$GITHUB_REF_NAME" --generate-notes
         env:
