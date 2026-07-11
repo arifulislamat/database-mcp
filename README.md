@@ -1,4 +1,4 @@
-# db-mcp
+# database-mcp
 
 MCP servers that give AI clients safe, structured access to SQL databases.
 
@@ -8,13 +8,13 @@ guardrails on by default: read-only mode, row caps, and statement timeouts.
 
 ## Packages
 
-| Engine   | TypeScript (npm)   | Status  |
-| -------- | ------------------ | ------- |
-| SQLite   | `@db-mcp/sqlite`   | planned |
-| libSQL   | `@db-mcp/libsql`   | planned |
-| MySQL    | `@db-mcp/mysql`    | planned |
-| MariaDB  | `@db-mcp/mariadb`  | planned |
-| Postgres | `@db-mcp/postgres` | planned |
+| Engine   | TypeScript (npm)         | Status  |
+| -------- | ------------------------ | ------- |
+| SQLite   | `@database-mcp/sqlite`   | planned |
+| libSQL   | `@database-mcp/libsql`   | planned |
+| MySQL    | `@database-mcp/mysql`    | planned |
+| MariaDB  | `@database-mcp/mariadb`  | planned |
+| Postgres | `@database-mcp/postgres` | planned |
 
 Python, Go, and Rust implementations are planned once the TypeScript line is
 complete. All packages, in every language, pass the same language-agnostic
@@ -39,14 +39,14 @@ conformance suite, so behavior is identical everywhere.
 
 ## Quick start
 
-Coming with the first release (`@db-mcp/sqlite`).
+Coming with the first release (`@database-mcp/sqlite`).
 
 ```json
 {
   "mcpServers": {
-    "db-mcp": {
+    "database-mcp": {
       "command": "npx",
-      "args": ["@db-mcp/sqlite", "--dsn", "/absolute/path/to/database.db"]
+      "args": ["@database-mcp/sqlite", "--dsn", "/absolute/path/to/database.db"]
     }
   }
 }

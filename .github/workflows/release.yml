@@ -1,7 +1,7 @@
 name: Release
 
 # Tag-triggered only, never per-merge. The tag prefix selects the package:
-#   sqlite-ts-v0.1.0 -> @db-mcp/sqlite,  core-ts-v0.2.0 -> @db-mcp/core, ...
+#   sqlite-ts-v0.1.0 -> @database-mcp/sqlite,  core-ts-v0.2.0 -> @database-mcp/core, ...
 on:
   push:
     tags:
@@ -34,7 +34,7 @@ jobs:
       - name: Conformance (never publish unverified code)
         run: node conformance/run.mjs -- node sqlite/typescript/dist/index.js
       - name: Publish
-        run: npm publish --workspace "@db-mcp/${{ steps.tag.outputs.package }}" --access public
+        run: npm publish --workspace "@database-mcp/${{ steps.tag.outputs.package }}" --access public
       - name: GitHub release
         run: gh release create "$GITHUB_REF_NAME" --generate-notes
         env:

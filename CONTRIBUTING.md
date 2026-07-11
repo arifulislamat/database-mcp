@@ -1,4 +1,4 @@
-# Contributing to db-mcp
+# Contributing to database-mcp
 
 Thanks for your interest in contributing.
 

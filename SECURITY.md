@@ -1,6 +1,6 @@
 # Security Policy
 
-db-mcp servers handle database credentials. Security reports are taken
+database-mcp servers handle database credentials. Security reports are taken
 seriously and handled privately.
 
 ## Reporting a vulnerability
