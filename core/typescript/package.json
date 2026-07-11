@@ -1,14 +1,11 @@
 {
-  "name": "@database-mcp/sqlite",
-  "version": "0.1.1",
-  "description": "MCP server for SQLite with read-only guardrails, row caps, and statement timeouts",
+  "name": "@database-mcp/core",
+  "version": "0.1.0",
+  "description": "Engine-agnostic core for database-mcp MCP servers: protocol layer, adapter interface, guardrails, SQL guard",
   "license": "MIT",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "bin": {
-    "database-mcp-sqlite": "dist/index.js"
-  },
   "files": [
     "dist"
   ],
@@ -18,22 +15,20 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/arifulislamat/database-mcp.git",
-    "directory": "sqlite/typescript"
+    "directory": "core/typescript"
   },
   "homepage": "https://github.com/arifulislamat/database-mcp#readme",
   "keywords": [
     "mcp",
     "model-context-protocol",
-    "sqlite",
     "database",
     "sql"
   ],
   "dependencies": {
-    "@database-mcp/core": "^0.1.0",
-    "better-sqlite3": "^12.2.0"
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "zod": "^3.25.0"
   },
   "devDependencies": {
-    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^22.0.0",
     "typescript": "^5.8.0"
   },
