@@ -33,6 +33,8 @@ jobs:
         run: npm run build
       - name: Conformance (never publish unverified code)
         run: node conformance/run.mjs -- node sqlite/typescript/dist/index.js
+      - name: Upgrade npm (OIDC trusted publishing needs >= 11.5)
+        run: npm install -g npm@latest
       - name: Publish
         run: npm publish --workspace "@database-mcp/${{ steps.tag.outputs.package }}" --access public
       - name: GitHub release
