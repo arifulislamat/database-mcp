@@ -21,6 +21,9 @@ jobs:
       - name: Build
         run: |
           if [ -f package.json ]; then npm run build; else echo "skipping"; fi
+      - name: Tests
+        run: |
+          if [ -f package.json ]; then npm test; else echo "skipping"; fi
       - name: Conformance
         run: |
           if [ -f conformance/run.mjs ]; then
