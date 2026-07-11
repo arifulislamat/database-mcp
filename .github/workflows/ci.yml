@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  typescript:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # Until the first package lands (M0.5) there is nothing to build;
+      # the guard keeps this workflow green on the bare repo.
+      - name: Install
+        run: |
+          if [ -f package.json ]; then npm ci; else echo "no package.json yet — skipping"; fi
+      - name: Build
+        run: |
+          if [ -f package.json ]; then npm run build; else echo "skipping"; fi
+      - name: Conformance
+        run: |
+          if [ -f conformance/run.mjs ]; then
+            node conformance/run.mjs -- node sqlite/typescript/dist/index.js
+          else
+            echo "no conformance suite yet — skipping"
+          fi

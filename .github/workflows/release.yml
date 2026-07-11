@@ -1,0 +1,41 @@
+name: Release
+
+# Tag-triggered only, never per-merge. The tag prefix selects the package:
+#   sqlite-ts-v0.1.0 -> @db-mcp/sqlite,  core-ts-v0.2.0 -> @db-mcp/core, ...
+on:
+  push:
+    tags:
+      - "*-ts-v*"
+
+permissions:
+  contents: write
+  id-token: write # npm OIDC trusted publishing — no long-lived token
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+      - name: Parse tag
+        id: tag
+        run: |
+          # <pkg>-ts-v<version>
+          TAG="${GITHUB_REF_NAME}"
+          echo "package=${TAG%-ts-v*}" >> "$GITHUB_OUTPUT"
+          echo "version=${TAG##*-ts-v}" >> "$GITHUB_OUTPUT"
+      - name: Install
+        run: npm ci
+      - name: Build
+        run: npm run build
+      - name: Conformance (never publish unverified code)
+        run: node conformance/run.mjs -- node sqlite/typescript/dist/index.js
+      - name: Publish
+        run: npm publish --workspace "@db-mcp/${{ steps.tag.outputs.package }}" --access public
+      - name: GitHub release
+        run: gh release create "$GITHUB_REF_NAME" --generate-notes
+        env:
+          GH_TOKEN: ${{ github.token }}
