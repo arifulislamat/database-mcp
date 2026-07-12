@@ -52,7 +52,7 @@ jobs:
           --health-retries 20
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
       # Until the first package lands (M0.5) there is nothing to build;
