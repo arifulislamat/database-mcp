@@ -36,7 +36,7 @@
   "devDependencies": {
     "@types/node": "^22.0.0",
     "@types/pg": "^8.15.0",
-    "typescript": "^5.8.0"
+    "typescript": "^7.0.2"
   },
   "engines": {
     "node": ">=20"
