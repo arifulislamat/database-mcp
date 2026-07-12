@@ -20,9 +20,11 @@ const here = dirname(fileURLToPath(import.meta.url));
 const sep = process.argv.indexOf("--");
 const engineIdx = process.argv.indexOf("--engine");
 const engine = engineIdx >= 0 ? process.argv[engineIdx + 1] : "sqlite";
+const transportIdx = process.argv.indexOf("--transport");
+const transport = transportIdx >= 0 ? process.argv[transportIdx + 1] : "stdio";
 const [command, ...args] = process.argv.slice(sep + 1);
 if (sep === -1 || !command) {
-  console.error("usage: node run.mjs [--engine sqlite|mysql|mariadb] -- <command> [args...]");
+  console.error("usage: node run.mjs [--engine <engine>] [--transport stdio|http] -- <command> [args...]");
   process.exit(2);
 }
 
@@ -89,15 +91,38 @@ const cases = JSON.parse(readFileSync(join(here, "cases.json"), "utf8"));
 const client = new Client({ name: "conformance", version: "0.0.0" });
 let failures = 0;
 
+let child; // http mode only; stdio's transport owns its own process
+
 try {
-  await client.connect(
-    new StdioClientTransport({
-      command,
-      args,
+  if (transport === "http") {
+    const { spawn } = await import("node:child_process");
+    const { StreamableHTTPClientTransport } = await import("@modelcontextprotocol/sdk/client/streamableHttp.js");
+    const port = 38217;
+    child = spawn(command, [...args, "--transport", "http", "--port", String(port)], {
       env: { ...process.env, ...serverEnv, MAX_ROWS: "3" },
-      stderr: "inherit",
-    }),
-  );
+      stdio: ["ignore", "ignore", "inherit"],
+    });
+    let up = false;
+    for (let i = 0; i < 100 && !up; i++) {
+      try {
+        await fetch(`http://127.0.0.1:${port}/mcp`);
+        up = true;
+      } catch {
+        await new Promise((r) => setTimeout(r, 100));
+      }
+    }
+    if (!up) throw new Error("server did not start listening");
+    await client.connect(new StreamableHTTPClientTransport(new URL(`http://127.0.0.1:${port}/mcp`)));
+  } else {
+    await client.connect(
+      new StdioClientTransport({
+        command,
+        args,
+        env: { ...process.env, ...serverEnv, MAX_ROWS: "3" },
+        stderr: "inherit",
+      }),
+    );
+  }
 
   for (const c of cases) {
     const problems = [];
@@ -134,6 +159,7 @@ try {
   }
 } finally {
   await client.close().catch(() => {});
+  child?.kill("SIGTERM");
   cleanup();
 }
 

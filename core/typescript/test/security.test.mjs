@@ -74,6 +74,13 @@ test("config: inline DSN password gets registered for redaction", () => {
   assert.equal(redact("log with dsn-inline-pw inside"), "log with *** inside");
 });
 
+test("config: transport defaults to stdio, flags select http", () => {
+  const a = loadConfig(["--dsn", "/x.db"], {}, { envPrefix: "SQLITE" });
+  assert.deepEqual(a.transport, { type: "stdio", port: 8080 });
+  const b = loadConfig(["--dsn", "/x.db", "--transport", "http", "--port", "9090"], {}, { envPrefix: "SQLITE" });
+  assert.deepEqual(b.transport, { type: "http", port: 9090 });
+});
+
 test("sql-guard: read-only and multi-statement classification", () => {
   assert.equal(guardSql("SELECT 1", true), null);
   assert.equal(guardSql("  -- comment\n  select * from t", true), null);

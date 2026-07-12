@@ -19,9 +19,16 @@ export interface Connection {
   database?: string;
 }
 
+export interface TransportConfig {
+  type: "stdio" | "http";
+  /** http only; the server binds 127.0.0.1. */
+  port: number;
+}
+
 export interface Config {
   connection: Connection;
   guardrails: Guardrails;
+  transport: TransportConfig;
 }
 
 export interface ConfigOptions {
@@ -80,6 +87,7 @@ export function loadConfig(argv: string[], env: NodeJS.ProcessEnv, opts: ConfigO
     : {};
   const fc = (file.connection ?? {}) as Record<string, string | number | undefined>;
   const fg = (file.guardrails ?? {}) as Record<string, unknown>;
+  const ft = (file.transport ?? {}) as Record<string, string | number | undefined>;
   const P = opts.envPrefix;
 
   const pwVar = opts.passwordEnvVar ?? `${P}_PASSWORD`;
@@ -120,6 +128,10 @@ export function loadConfig(argv: string[], env: NodeJS.ProcessEnv, opts: ConfigO
             : true,
       maxRows: Number(flag("--max-rows") ?? fg.maxRows ?? env.MAX_ROWS ?? 1000),
       queryTimeoutMs: Number(flag("--query-timeout-ms") ?? fg.queryTimeoutMs ?? env.QUERY_TIMEOUT_MS ?? 30000),
+    },
+    transport: {
+      type: (flag("--transport") ?? ft.type ?? "stdio") as "stdio" | "http",
+      port: Number(flag("--port") ?? ft.port ?? 8080),
     },
   };
 

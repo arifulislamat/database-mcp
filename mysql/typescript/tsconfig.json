@@ -8,7 +8,10 @@
     "strict": true,
     "declaration": true,
     "sourceMap": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "noEmitOnError": true
   },
-  "include": ["src"]
+  "include": [
+    "src"
+  ]
 }
