@@ -1,6 +1,6 @@
 {
   "name": "@database-mcp/mysql",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "MCP server for MySQL with read-only guardrails, row caps, and statement timeouts",
   "license": "MIT",
   "type": "module",
@@ -47,5 +47,6 @@
       "types": "./dist/adapter.d.ts",
       "default": "./dist/adapter.js"
     }
-  }
+  },
+  "mcpName": "io.github.arifulislamat/database-mcp-mysql"
 }
