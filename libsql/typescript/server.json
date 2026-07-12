@@ -1,7 +1,7 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.arifulislamat/database-mcp-libsql",
-  "description": "MCP server for libSQL and Turso databases, local files or remote with auth token. Read-only by default.",
+  "description": "MCP server for libSQL/Turso, local or remote. Read-only by default, row caps, timeouts.",
   "repository": {
     "url": "https://github.com/arifulislamat/database-mcp",
     "source": "github"
