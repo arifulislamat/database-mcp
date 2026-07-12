@@ -4,12 +4,14 @@
   "workspaces": [
     "core/typescript",
     "sqlite/typescript",
+    "libsql/typescript",
     "conformance"
   ],
   "scripts": {
-    "build": "npm run build -w @database-mcp/core && npm run build -w @database-mcp/sqlite",
-    "conformance": "node conformance/run.mjs -- node sqlite/typescript/dist/index.js",
-    "test": "npm test -w @database-mcp/core"
+    "build": "npm run build -w @database-mcp/core && npm run build -w @database-mcp/sqlite && npm run build -w @database-mcp/libsql",
+    "conformance": "node conformance/run.mjs -- node sqlite/typescript/dist/index.js && node conformance/run.mjs -- node libsql/typescript/dist/index.js",
+    "test": "npm test -w @database-mcp/core",
+    "leak-check": "node conformance/leak-libsql.mjs"
   },
   "engines": {
     "node": ">=20"

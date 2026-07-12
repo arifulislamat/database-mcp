@@ -27,7 +27,10 @@ jobs:
       - name: Conformance
         run: |
           if [ -f conformance/run.mjs ]; then
-            node conformance/run.mjs -- node sqlite/typescript/dist/index.js
+            npm run conformance
           else
             echo "no conformance suite yet — skipping"
           fi
+      - name: Secret leak check
+        run: |
+          if [ -f conformance/leak-libsql.mjs ]; then npm run leak-check; fi

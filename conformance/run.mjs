@@ -38,7 +38,8 @@ try {
     new StdioClientTransport({
       command,
       args,
-      env: { ...process.env, SQLITE_PATH: dbPath, MAX_ROWS: "3" },
+      // Both SQLite-family env vars point at the fixture; each engine reads its own.
+      env: { ...process.env, SQLITE_PATH: dbPath, LIBSQL_URL: `file:${dbPath}`, MAX_ROWS: "3" },
       stderr: "inherit",
     }),
   );

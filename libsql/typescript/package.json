@@ -1,0 +1,47 @@
+{
+  "name": "@database-mcp/libsql",
+  "version": "0.2.0",
+  "description": "MCP server for libSQL/Turso (local files and remote databases) with read-only guardrails, row caps, and statement timeouts",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "database-mcp-libsql": "dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arifulislamat/database-mcp.git",
+    "directory": "libsql/typescript"
+  },
+  "homepage": "https://github.com/arifulislamat/database-mcp#readme",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "libsql",
+    "turso",
+    "sqlite",
+    "database",
+    "sql"
+  ],
+  "dependencies": {
+    "@database-mcp/core": "^0.2.0",
+    "@libsql/client": "^0.17.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.8.0"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
