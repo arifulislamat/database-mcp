@@ -1,37 +1,41 @@
 {
-  "name": "@database-mcp/core",
-  "version": "0.2.2",
-  "description": "Engine-agnostic core for database-mcp MCP servers: protocol layer, adapter interface, guardrails, SQL guard",
+  "name": "@database-mcp/postgres",
+  "version": "0.2.0",
+  "description": "MCP server for PostgreSQL with read-only guardrails, row caps, and statement timeouts",
   "license": "MIT",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "bin": {
+    "database-mcp-postgres": "dist/index.js"
+  },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsc",
-    "test": "node --test test/*.test.mjs"
+    "build": "tsc"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/arifulislamat/database-mcp.git",
-    "directory": "core/typescript"
+    "directory": "postgres/typescript"
   },
   "homepage": "https://github.com/arifulislamat/database-mcp#readme",
   "keywords": [
     "mcp",
     "model-context-protocol",
+    "postgres",
+    "postgresql",
     "database",
     "sql"
   ],
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.12.0",
-    "zod": "^3.25.0",
-    "yaml": "^2.8.0"
+    "@database-mcp/core": "^0.2.2",
+    "pg": "^8.22.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
+    "@types/pg": "^8.15.0",
     "typescript": "^5.8.0"
   },
   "engines": {

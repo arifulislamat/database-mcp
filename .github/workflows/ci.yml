@@ -23,6 +23,19 @@ jobs:
           --health-interval 5s
           --health-timeout 3s
           --health-retries 20
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: mcp
+          POSTGRES_PASSWORD: mcp-password
+          POSTGRES_DB: conformance
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U mcp -d conformance"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
       mariadb:
         image: mariadb:11
         env:

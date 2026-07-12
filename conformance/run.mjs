@@ -52,6 +52,27 @@ if (engine === "mysql" || engine === "mariadb") {
     [`${P}_PASSWORD`]: cfg.password,
     [`${P}_DATABASE`]: cfg.database,
   };
+} else if (engine === "postgres") {
+  const cfg = {
+    host: process.env.POSTGRES_HOST ?? "127.0.0.1",
+    port: Number(process.env.POSTGRES_PORT ?? 5432),
+    user: process.env.POSTGRES_USER ?? "mcp",
+    password: process.env.POSTGRES_PASSWORD ?? "mcp-password",
+    database: process.env.POSTGRES_DATABASE ?? "conformance",
+  };
+  const { default: pg } = await import("pg");
+  const client = new pg.Client(cfg);
+  await client.connect();
+  await client.query("DROP TABLE IF EXISTS orders, users CASCADE");
+  await client.query(readFileSync(join(here, "fixtures", "seed.postgres.sql"), "utf8"));
+  await client.end();
+  serverEnv = {
+    POSTGRES_HOST: cfg.host,
+    POSTGRES_PORT: String(cfg.port),
+    POSTGRES_USER: cfg.user,
+    POSTGRES_PASSWORD: cfg.password,
+    POSTGRES_DATABASE: cfg.database,
+  };
 } else {
   const { default: Database } = await import("better-sqlite3");
   const dir = mkdtempSync(join(tmpdir(), "database-mcp-conformance-"));
