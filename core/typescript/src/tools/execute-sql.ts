@@ -17,8 +17,8 @@ function sanitizeError(e: unknown): string {
   if (/readonly database|query_only|read.only transaction/i.test(message)) {
     return "read-only: statement blocked by the database session (start the server with --allow-write to enable writes)";
   }
-  // mysql2's per-query timeout surfaces as an inactivity timeout error.
-  if (/inactivity timeout|PROTOCOL_SEQUENCE_TIMEOUT/i.test(message)) {
+  // mysql2: inactivity timeout; Postgres: "canceling statement due to statement timeout".
+  if (/inactivity timeout|PROTOCOL_SEQUENCE_TIMEOUT|statement timeout/i.test(message)) {
     return "timeout: query exceeded the configured queryTimeoutMs";
   }
   return message;
