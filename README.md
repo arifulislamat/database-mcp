@@ -1,5 +1,10 @@
 # database-mcp
 
+[![CI](https://github.com/arifulislamat/database-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/arifulislamat/database-mcp/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/github/license/arifulislamat/database-mcp)](LICENSE)
+[![npm](https://img.shields.io/npm/v/%40database-mcp%2Fcore?label=%40database-mcp%2Fcore)](https://www.npmjs.com/package/@database-mcp/core)
+[![Node >= 20](https://img.shields.io/node/v/%40database-mcp%2Fcore)](https://nodejs.org)
+
 MCP servers that give AI clients safe, structured access to SQL databases.
 
 One installable package per database engine. Every package exposes the same
@@ -10,11 +15,11 @@ guardrails on by default: read-only mode, row caps, and statement timeouts.
 
 | Engine   | TypeScript (npm)         | Version |
 | -------- | ------------------------ | ------- |
-| SQLite   | [`@database-mcp/sqlite`](https://www.npmjs.com/package/@database-mcp/sqlite)   | 0.2.0 |
-| libSQL   | [`@database-mcp/libsql`](https://www.npmjs.com/package/@database-mcp/libsql)   | 0.2.0 |
-| MySQL    | [`@database-mcp/mysql`](https://www.npmjs.com/package/@database-mcp/mysql)    | 0.2.1 |
-| MariaDB  | [`@database-mcp/mariadb`](https://www.npmjs.com/package/@database-mcp/mariadb)  | 0.2.0 |
-| Postgres | [`@database-mcp/postgres`](https://www.npmjs.com/package/@database-mcp/postgres) | 0.2.0 |
+| SQLite   | [`@database-mcp/sqlite`](https://www.npmjs.com/package/@database-mcp/sqlite)   | [![npm](https://img.shields.io/npm/v/%40database-mcp%2Fsqlite?label=)](https://www.npmjs.com/package/@database-mcp/sqlite) |
+| libSQL   | [`@database-mcp/libsql`](https://www.npmjs.com/package/@database-mcp/libsql)   | [![npm](https://img.shields.io/npm/v/%40database-mcp%2Flibsql?label=)](https://www.npmjs.com/package/@database-mcp/libsql) |
+| MySQL    | [`@database-mcp/mysql`](https://www.npmjs.com/package/@database-mcp/mysql)    | [![npm](https://img.shields.io/npm/v/%40database-mcp%2Fmysql?label=)](https://www.npmjs.com/package/@database-mcp/mysql) |
+| MariaDB  | [`@database-mcp/mariadb`](https://www.npmjs.com/package/@database-mcp/mariadb)  | [![npm](https://img.shields.io/npm/v/%40database-mcp%2Fmariadb?label=)](https://www.npmjs.com/package/@database-mcp/mariadb) |
+| Postgres | [`@database-mcp/postgres`](https://www.npmjs.com/package/@database-mcp/postgres) | [![npm](https://img.shields.io/npm/v/%40database-mcp%2Fpostgres?label=)](https://www.npmjs.com/package/@database-mcp/postgres) |
 
 All five are published, provenance-attested, and pass the shared conformance
 suite against real databases in CI.

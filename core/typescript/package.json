@@ -1,6 +1,6 @@
 {
   "name": "@database-mcp/core",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Engine-agnostic core for database-mcp MCP servers: protocol layer, adapter interface, guardrails, SQL guard",
   "license": "MIT",
   "type": "module",
