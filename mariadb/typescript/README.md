@@ -1,5 +1,7 @@
 # @database-mcp/mariadb
 
+[![npm](https://img.shields.io/npm/v/%40database-mcp%2Fmariadb)](https://www.npmjs.com/package/@database-mcp/mariadb) [![CI](https://github.com/arifulislamat/database-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/arifulislamat/database-mcp/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/github/license/arifulislamat/database-mcp)](https://github.com/arifulislamat/database-mcp/blob/main/LICENSE)
+
 MCP server giving AI clients safe, structured access to a MariaDB database.
 Two tools, guardrails on by default. MariaDB is MySQL wire-compatible, so
 this is a thin package over the

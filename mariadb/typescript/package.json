@@ -1,6 +1,6 @@
 {
   "name": "@database-mcp/mariadb",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "MCP server for MariaDB with read-only guardrails, row caps, and statement timeouts",
   "license": "MIT",
   "type": "module",
@@ -30,15 +30,15 @@
     "sql"
   ],
   "dependencies": {
-    "@database-mcp/core": "^0.3.0",
-    "@database-mcp/mysql": "^0.3.0"
+    "@database-mcp/core": "^0.4.0",
+    "@database-mcp/mysql": "^0.4.0"
   },
   "devDependencies": {
-    "@types/node": "^22.0.0",
-    "typescript": "^5.8.0"
+    "@types/node": "^24.0.0",
+    "typescript": "^7.0.2"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "publishConfig": {
     "access": "public"

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.0
+
+- Dependency refresh: zod 4, MCP SDK 1.29, TypeScript 7.
+- Requires Node 22 or newer (Node 20 is end-of-life).
+
 ## 0.3.1
 
 - HTTP transport: reject requests whose Host or Origin header is not local
