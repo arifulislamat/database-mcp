@@ -17,6 +17,6 @@
     "leak-check": "node conformance/leak-libsql.mjs && node conformance/leak-mysql.mjs && node conformance/leak-postgres.mjs"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   }
 }

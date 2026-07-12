@@ -9,7 +9,10 @@
     "declaration": true,
     "sourceMap": true,
     "skipLibCheck": true,
-    "noEmitOnError": true
+    "noEmitOnError": true,
+    "types": [
+      "node"
+    ]
   },
   "include": [
     "src"

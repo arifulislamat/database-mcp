@@ -1,5 +1,7 @@
 # @database-mcp/postgres
 
+[![npm](https://img.shields.io/npm/v/%40database-mcp%2Fpostgres)](https://www.npmjs.com/package/@database-mcp/postgres) [![CI](https://github.com/arifulislamat/database-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/arifulislamat/database-mcp/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/github/license/arifulislamat/database-mcp)](https://github.com/arifulislamat/database-mcp/blob/main/LICENSE)
+
 MCP server giving AI clients safe, structured access to a PostgreSQL
 database. Two tools, guardrails on by default.
 
