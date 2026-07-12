@@ -29,6 +29,12 @@ export interface ConfigOptions {
   envPrefix: string;
   /** Engine-specific env var for the connection target, e.g. SQLITE_PATH. */
   dsnEnvVar?: string;
+  /**
+   * Env var for the secret when the engine doesn't call it a password,
+   * e.g. LIBSQL_AUTH_TOKEN. Defaults to <envPrefix>_PASSWORD. The *_FILE
+   * variant is derived from it either way.
+   */
+  passwordEnvVar?: string;
 }
 
 /** ${VAR} in YAML string values resolves from the environment at load time. */
@@ -76,10 +82,11 @@ export function loadConfig(argv: string[], env: NodeJS.ProcessEnv, opts: ConfigO
   const fg = (file.guardrails ?? {}) as Record<string, unknown>;
   const P = opts.envPrefix;
 
-  const passwordFile = (fc.password_file as string | undefined) ?? env[`${P}_PASSWORD_FILE`];
+  const pwVar = opts.passwordEnvVar ?? `${P}_PASSWORD`;
+  const passwordFile = (fc.password_file as string | undefined) ?? env[`${pwVar}_FILE`];
   const rawPassword = passwordFile
     ? readFileSync(passwordFile, "utf8").trim()
-    : ((fc.password as string | undefined) ?? env[`${P}_PASSWORD`]);
+    : ((fc.password as string | undefined) ?? env[pwVar]);
 
   const dsn = flag("--dsn") ?? (fc.dsn as string | undefined) ?? (opts.dsnEnvVar ? env[opts.dsnEnvVar] : undefined) ?? env[`${P}_DSN`];
   // Inline DSN credentials are discouraged but must never leak: register them.
