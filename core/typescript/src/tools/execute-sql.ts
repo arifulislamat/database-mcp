@@ -12,8 +12,14 @@ function err(message: string): ToolResult {
 function sanitizeError(e: unknown): string {
   const message = e instanceof Error ? e.message : String(e);
   if (/timeout:|read-only:|multi-statement:/.test(message)) return message;
-  if (/readonly database|query_only/i.test(message)) {
+  // SQLite: "readonly database"/query_only; MySQL: "READ ONLY transaction";
+  // Postgres: "read-only transaction".
+  if (/readonly database|query_only|read.only transaction/i.test(message)) {
     return "read-only: statement blocked by the database session (start the server with --allow-write to enable writes)";
+  }
+  // mysql2's per-query timeout surfaces as an inactivity timeout error.
+  if (/inactivity timeout|PROTOCOL_SEQUENCE_TIMEOUT/i.test(message)) {
+    return "timeout: query exceeded the configured queryTimeoutMs";
   }
   return message;
 }
