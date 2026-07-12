@@ -1,0 +1,36 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.arifulislamat/database-mcp-libsql",
+  "description": "MCP server for libSQL and Turso databases, local files or remote with auth token. Read-only by default.",
+  "repository": {
+    "url": "https://github.com/arifulislamat/database-mcp",
+    "source": "github"
+  },
+  "version": "0.4.1",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "@database-mcp/libsql",
+      "version": "0.4.1",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "LIBSQL_URL",
+          "description": "Database URL (file path or libsql://... remote)",
+          "isRequired": true,
+          "format": "string",
+          "isSecret": false
+        },
+        {
+          "name": "LIBSQL_AUTH_TOKEN",
+          "description": "Auth token for remote libSQL/Turso databases",
+          "isRequired": false,
+          "format": "string",
+          "isSecret": true
+        }
+      ]
+    }
+  ]
+}

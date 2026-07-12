@@ -1,6 +1,6 @@
 {
   "name": "@database-mcp/sqlite",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "MCP server for SQLite with read-only guardrails, row caps, and statement timeouts",
   "license": "MIT",
   "type": "module",
@@ -42,5 +42,6 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "mcpName": "io.github.arifulislamat/database-mcp-sqlite"
 }
