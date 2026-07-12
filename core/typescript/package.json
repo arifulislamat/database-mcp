@@ -27,7 +27,7 @@
   ],
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.0",
-    "zod": "^3.25.0",
+    "zod": "^4.4.3",
     "yaml": "^2.8.0"
   },
   "devDependencies": {
