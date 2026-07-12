@@ -52,8 +52,30 @@ export async function serve(adapter: DatabaseAdapter, config: Config, version: s
 async function serveHttp(adapter: DatabaseAdapter, config: Config, version: string): Promise<void> {
   const transports = new Map<string, StreamableHTTPServerTransport>();
 
+  // DNS rebinding protection: a malicious webpage can point its own domain
+  // at 127.0.0.1 and make a visitor's browser hit this server. Reject any
+  // request whose Host or Origin is not local.
+  const localNames = new Set(["127.0.0.1", "localhost", "[::1]"]);
+  const isLocal = (req: http.IncomingMessage): boolean => {
+    const host = (req.headers.host ?? "").replace(/:\d+$/, "");
+    if (!localNames.has(host)) return false;
+    if (req.headers.origin) {
+      try {
+        const originHost = new URL(req.headers.origin).hostname;
+        return localNames.has(originHost) || localNames.has(`[${originHost}]`);
+      } catch {
+        return false;
+      }
+    }
+    return true;
+  };
+
   const httpServer = http.createServer(async (req, res) => {
     try {
+      if (!isLocal(req)) {
+        res.writeHead(403).end();
+        return;
+      }
       if (!req.url?.startsWith("/mcp")) {
         res.writeHead(404).end();
         return;

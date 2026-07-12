@@ -1,0 +1,20 @@
+# Changelog
+
+Behavior inherited from core (config, guardrails, transports, secret
+handling) is tracked in the
+[@database-mcp/core changelog](https://github.com/arifulislamat/database-mcp/blob/main/core/typescript/CHANGELOG.md).
+
+## 0.3.0
+
+- Streamable HTTP transport available via core (`--transport http`).
+
+## 0.2.1
+
+- Export the adapter as the package's library entry so sibling engines
+  (MariaDB) can reuse it. Server behavior unchanged.
+
+## 0.2.0
+
+- First release: information_schema introspection, session-level read-only
+  (`SET SESSION TRANSACTION READ ONLY`), per-query timeout, password
+  leak-checked in CI.
