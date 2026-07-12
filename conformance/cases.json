@@ -45,7 +45,11 @@
     "name": "read-only rejects a CTE-smuggled write (session layer)",
     "tool": "execute_sql",
     "args": { "sql": "WITH d AS (SELECT 1) DELETE FROM users" },
-    "expect": { "isError": true, "textPrefix": "read-only:" }
+    "expect": { "isError": true, "textPrefix": "read-only:" },
+    "overrides": {
+      "mariadb": { "isError": true }
+    },
+    "note": "MariaDB cannot parse CTE-prefixed DML at all (vector inexpressible); its session layer verified separately — direct writes on a read-only session are rejected by the server."
   },
   {
     "name": "data unchanged after blocked writes",

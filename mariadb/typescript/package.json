@@ -1,13 +1,13 @@
 {
-  "name": "@database-mcp/mysql",
-  "version": "0.2.1",
-  "description": "MCP server for MySQL with read-only guardrails, row caps, and statement timeouts",
+  "name": "@database-mcp/mariadb",
+  "version": "0.2.0",
+  "description": "MCP server for MariaDB with read-only guardrails, row caps, and statement timeouts",
   "license": "MIT",
   "type": "module",
-  "main": "dist/adapter.js",
-  "types": "dist/adapter.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "bin": {
-    "database-mcp-mysql": "dist/index.js"
+    "database-mcp-mariadb": "dist/index.js"
   },
   "files": [
     "dist"
@@ -18,19 +18,20 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/arifulislamat/database-mcp.git",
-    "directory": "mysql/typescript"
+    "directory": "mariadb/typescript"
   },
   "homepage": "https://github.com/arifulislamat/database-mcp#readme",
   "keywords": [
     "mcp",
     "model-context-protocol",
+    "mariadb",
     "mysql",
     "database",
     "sql"
   ],
   "dependencies": {
-    "@database-mcp/core": "^0.2.0",
-    "mysql2": "^3.22.6"
+    "@database-mcp/core": "^0.2.1",
+    "@database-mcp/mysql": "^0.2.1"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
@@ -41,11 +42,5 @@
   },
   "publishConfig": {
     "access": "public"
-  },
-  "exports": {
-    ".": {
-      "types": "./dist/adapter.d.ts",
-      "default": "./dist/adapter.js"
-    }
   }
 }
