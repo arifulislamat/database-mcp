@@ -1,0 +1,16 @@
+# Networked engines for dev and conformance. SQLite/libSQL need none of this.
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: conformance
+      MYSQL_USER: mcp
+      MYSQL_PASSWORD: mcp-password
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 3s
+      retries: 20

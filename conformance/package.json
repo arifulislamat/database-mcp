@@ -2,9 +2,10 @@
   "name": "conformance",
   "private": true,
   "type": "module",
-  "description": "Language-agnostic conformance suite — the definition of done for any database-mcp server",
+  "description": "Language-agnostic conformance suite \u2014 the definition of done for any database-mcp server",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.0",
-    "better-sqlite3": "^12.2.0"
+    "better-sqlite3": "^12.2.0",
+    "mysql2": "^3.22.6"
   }
 }

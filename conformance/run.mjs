@@ -1,8 +1,12 @@
 #!/usr/bin/env node
 // Conformance suite — the definition of done for any database-mcp server.
-// Usage: node run.mjs -- <command to launch server> [args...]
-// Spawns the server over stdio with a seeded fixture database and asserts
-// the shared cases.json. MAX_ROWS is pinned to 3 so the truncation case holds.
+// Usage: node run.mjs [--engine sqlite|mysql] -- <command to launch server> [args...]
+//
+// Seeds an engine-appropriate fixture (identical tables and rows in every
+// dialect), spawns the server over stdio, and asserts the shared cases.json.
+// MAX_ROWS is pinned to 3 so the truncation case holds. SQLite-family engines
+// seed a temp file; networked engines seed the docker-compose/CI service
+// (MYSQL_* env, defaults matching docker-compose.yml).
 
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
@@ -14,20 +18,48 @@ import { fileURLToPath } from "node:url";
 const here = dirname(fileURLToPath(import.meta.url));
 
 const sep = process.argv.indexOf("--");
+const engineIdx = process.argv.indexOf("--engine");
+const engine = engineIdx >= 0 ? process.argv[engineIdx + 1] : "sqlite";
 const [command, ...args] = process.argv.slice(sep + 1);
 if (sep === -1 || !command) {
-  console.error("usage: node run.mjs -- <command to launch server> [args...]");
+  console.error("usage: node run.mjs [--engine sqlite|mysql] -- <command> [args...]");
   process.exit(2);
 }
 
-// Seed a throwaway SQLite database. Networked engines get a docker-compose
-// seeding path when they land (M3); the fixture shape stays identical.
-const { default: Database } = await import("better-sqlite3");
-const dir = mkdtempSync(join(tmpdir(), "database-mcp-conformance-"));
-const dbPath = join(dir, "fixture.db");
-const seed = new Database(dbPath);
-seed.exec(readFileSync(join(here, "fixtures", "seed.sqlite.sql"), "utf8"));
-seed.close();
+let serverEnv = {};
+let cleanup = () => {};
+
+if (engine === "mysql") {
+  const cfg = {
+    host: process.env.MYSQL_HOST ?? "127.0.0.1",
+    port: Number(process.env.MYSQL_PORT ?? 3306),
+    user: process.env.MYSQL_USER ?? "mcp",
+    password: process.env.MYSQL_PASSWORD ?? "mcp-password",
+    database: process.env.MYSQL_DATABASE ?? "conformance",
+  };
+  const { default: mysql } = await import("mysql2/promise");
+  const conn = await mysql.createConnection({ ...cfg, multipleStatements: true });
+  await conn.query("DROP TABLE IF EXISTS orders; DROP TABLE IF EXISTS users;");
+  await conn.query(readFileSync(join(here, "fixtures", "seed.mysql.sql"), "utf8"));
+  await conn.end();
+  serverEnv = {
+    MYSQL_HOST: cfg.host,
+    MYSQL_PORT: String(cfg.port),
+    MYSQL_USER: cfg.user,
+    MYSQL_PASSWORD: cfg.password,
+    MYSQL_DATABASE: cfg.database,
+  };
+} else {
+  const { default: Database } = await import("better-sqlite3");
+  const dir = mkdtempSync(join(tmpdir(), "database-mcp-conformance-"));
+  const dbPath = join(dir, "fixture.db");
+  const seed = new Database(dbPath);
+  seed.exec(readFileSync(join(here, "fixtures", "seed.sqlite.sql"), "utf8"));
+  seed.close();
+  // Both SQLite-family env vars point at the fixture; each engine reads its own.
+  serverEnv = { SQLITE_PATH: dbPath, LIBSQL_URL: `file:${dbPath}` };
+  cleanup = () => rmSync(dir, { recursive: true, force: true });
+}
 
 const cases = JSON.parse(readFileSync(join(here, "cases.json"), "utf8"));
 const client = new Client({ name: "conformance", version: "0.0.0" });
@@ -38,8 +70,7 @@ try {
     new StdioClientTransport({
       command,
       args,
-      // Both SQLite-family env vars point at the fixture; each engine reads its own.
-      env: { ...process.env, SQLITE_PATH: dbPath, LIBSQL_URL: `file:${dbPath}`, MAX_ROWS: "3" },
+      env: { ...process.env, ...serverEnv, MAX_ROWS: "3" },
       stderr: "inherit",
     }),
   );
@@ -77,7 +108,7 @@ try {
   }
 } finally {
   await client.close().catch(() => {});
-  rmSync(dir, { recursive: true, force: true });
+  cleanup();
 }
 
 console.log(failures === 0 ? `\nconformance: all ${cases.length} cases passed` : `\nconformance: ${failures} FAILED`);

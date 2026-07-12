@@ -1,0 +1,45 @@
+{
+  "name": "@database-mcp/mysql",
+  "version": "0.2.0",
+  "description": "MCP server for MySQL with read-only guardrails, row caps, and statement timeouts",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "database-mcp-mysql": "dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arifulislamat/database-mcp.git",
+    "directory": "mysql/typescript"
+  },
+  "homepage": "https://github.com/arifulislamat/database-mcp#readme",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "mysql",
+    "database",
+    "sql"
+  ],
+  "dependencies": {
+    "@database-mcp/core": "^0.2.0",
+    "mysql2": "^3.22.6"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.8.0"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
