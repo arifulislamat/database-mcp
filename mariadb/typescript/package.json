@@ -34,7 +34,7 @@
     "@database-mcp/mysql": "^0.3.0"
   },
   "devDependencies": {
-    "@types/node": "^22.0.0",
+    "@types/node": "^26.1.1",
     "typescript": "^5.8.0"
   },
   "engines": {
