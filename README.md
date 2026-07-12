@@ -3,7 +3,7 @@
 MCP servers that give AI clients safe, structured access to SQL databases.
 
 One installable package per database engine. Every package exposes the same
-minimal two-tool surface — `execute_sql` and `search_objects` — with
+minimal two-tool surface, `execute_sql` and `search_objects`, with
 guardrails on by default: read-only mode, row caps, and statement timeouts.
 
 ## Packages
@@ -34,7 +34,7 @@ conformance suite, so behavior is identical everywhere.
   database itself. Rows are capped (default 1000) and statements time out
   (default 30s).
 - **Configured at launch, never via chat.** Connection details come from
-  flags, a YAML config file, or environment variables — credentials are never
+  flags, a YAML config file, or environment variables. Credentials are never
   accepted through a tool call.
 - **Secrets never appear in logs.** Passwords live in non-printable secret
   types, DSNs are sanitized before logging, and a redaction filter guards the
@@ -57,13 +57,13 @@ Pick your engine's package; each README has the full config surface. SQLite:
 
 Networked engines take credentials from the environment (`MYSQL_*`,
 `MARIADB_*`, `POSTGRES_*`/`DATABASE_URL`, `LIBSQL_URL`/`LIBSQL_AUTH_TOKEN`),
-`*_FILE` mounted secrets, or a YAML file via `--config` — never from a chat
+`*_FILE` mounted secrets, or a YAML file via `--config`. Never from a chat
 prompt.
 
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). The short version: the conformance
-suite is the definition of done — a change is mergeable only when
+suite is the definition of done. A change is mergeable only when
 `conformance/run.mjs` passes against every affected server.
 
 ## License

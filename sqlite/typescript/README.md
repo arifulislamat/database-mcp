@@ -16,19 +16,49 @@ Two tools, guardrails on by default.
 }
 ```
 
-Or with environment variables instead of flags: set `SQLITE_PATH`. Or keep
-everything in a YAML file and pass only `--config /abs/path/db-mcp.yaml`
-(values support `${VAR}` env expansion; secrets support `*_file` indirection).
-`--print-config` shows the resolved config with secrets redacted.
+## Configuration
+
+SQLite needs one thing: the path to the database file. Three ways to give it:
+
+### Flag
+
+`--dsn /absolute/path/to/database.db`, as in the quick start.
+
+### Environment variable
+
+```json
+"env": { "SQLITE_PATH": "/absolute/path/to/database.db" }
+```
+
+### YAML config file
+
+Useful if you want the guardrail settings in one file. Pass an absolute
+path, since the working directory at launch is unpredictable:
+
+```json
+"args": ["-y", "@database-mcp/sqlite", "--config", "/absolute/path/database-mcp.yaml"]
+```
+
+```yaml
+# /absolute/path/database-mcp.yaml
+connection:
+  dsn: /absolute/path/to/database.db
+
+guardrails:
+  readOnly: true
+  maxRows: 1000
+  queryTimeoutMs: 30000
+```
+
+Run the server with `--print-config` to see exactly what it resolved.
 
 ## Tools
 
-- **`execute_sql`** `{ sql }` — run a single SQL statement. Returns a summary
+- **`execute_sql`** `{ sql }` runs a single SQL statement. Returns a summary
   line (`N rows` / `truncated to N rows` / `OK (N affected)`) followed by
   compact JSON `{columns, rows}`.
-- **`search_objects`** `{ table? }` — without arguments, lists tables with
-  estimated row counts; with a table name, returns its columns, indexes, and
-  foreign keys.
+- **`search_objects`** `{ table? }` lists tables with estimated row counts,
+  or describes one table (columns, indexes, foreign keys).
 
 ## Guardrails (defaults)
 
@@ -39,8 +69,8 @@ everything in a YAML file and pass only `--config /abs/path/db-mcp.yaml`
 | Query timeout   | 30000 ms   | `--query-timeout-ms` / `QUERY_TIMEOUT_MS` |
 
 Read-only is enforced in two layers: a conservative SQL guard, plus the
-database file opened read-only with `PRAGMA query_only=ON` — so writes
-smuggled through CTEs are blocked too.
+database file opened read-only with `PRAGMA query_only=ON`. Writes smuggled
+through CTEs are blocked too.
 
 ## Part of database-mcp
 

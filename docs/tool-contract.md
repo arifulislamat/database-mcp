@@ -6,13 +6,13 @@ exactly these two tools. Behavior is validated by the conformance suite in
 
 ## `execute_sql`
 
-**Input:** `{ "sql": string }` — a single SQL statement.
+**Input:** `{ "sql": string }`, a single SQL statement.
 
 - Multi-statement input (`SELECT 1; DROP TABLE x`) is rejected before it
   reaches the database. Error starts with `multi-statement:`.
 - In read-only mode (the default), mutating statements are rejected. Error
   starts with `read-only:`. Enforcement is two-layered: a conservative SQL
-  guard, plus a session-level read-only setting in the database itself — so a
+  guard, plus a session-level read-only setting in the database itself, so a
   write smuggled through a CTE fails too.
 - Results are capped at `maxRows` (default 1000). Truncation is stated.
 - Statements exceeding `queryTimeoutMs` (default 30000) are aborted. Error
@@ -34,7 +34,7 @@ prefix (`read-only:`, `timeout:`, `multi-statement:`).
 
 ## `search_objects`
 
-Progressive schema disclosure — one tool instead of four.
+Progressive schema disclosure: one tool instead of four.
 
 **Input:** `{ "table"?: string }`
 
@@ -55,7 +55,7 @@ Progressive schema disclosure — one tool instead of four.
 
 ## Invariants
 
-- Connections are configured at launch (flags/env/config file) — credentials
+- Connections are configured at launch (flags/env/config file). Credentials
   are never accepted through a tool call.
 - stdout is reserved for the MCP stream; logs go to stderr.
 - Adding a tool to this contract is a breaking design change, not a feature.

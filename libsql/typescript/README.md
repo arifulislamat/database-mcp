@@ -1,13 +1,12 @@
 # @database-mcp/libsql
 
-MCP server giving AI clients safe, structured access to a libSQL database —
-local files or remote servers (Turso / sqld). Two tools, guardrails on by
-default.
+MCP server giving AI clients safe, structured access to a libSQL database,
+either a local file or a remote server (Turso / sqld). Two tools, guardrails
+on by default.
 
 ## Quick start (Claude Desktop / Claude Code / Cursor)
 
-Remote database with an auth token (the token comes from the environment,
-never from the client config):
+Remote database with an auth token:
 
 ```json
 {
@@ -15,23 +14,82 @@ never from the client config):
     "libsql": {
       "command": "npx",
       "args": ["-y", "@database-mcp/libsql", "--dsn", "libsql://your-db.turso.io"],
-      "env": { "LIBSQL_AUTH_TOKEN": "..." }
+      "env": { "LIBSQL_AUTH_TOKEN": "your-token" }
     }
   }
 }
 ```
 
-Local file: `--dsn /absolute/path/to/database.db` (no token needed).
+Local file, no token needed:
 
-Environment variables instead of flags: `LIBSQL_URL`, `LIBSQL_AUTH_TOKEN` (or
-`LIBSQL_AUTH_TOKEN_FILE` for Docker/K8s-style mounted secrets). Or keep
-everything in YAML via `--config` (values support `${VAR}` expansion).
-`--print-config` shows the resolved config with the token redacted.
+```json
+"args": ["-y", "@database-mcp/libsql", "--dsn", "/absolute/path/to/database.db"]
+```
+
+## Configuration
+
+Use whichever method fits your setup. When methods are combined, flags win
+over the YAML file, and the YAML file wins over environment variables.
+
+### Environment variables
+
+`LIBSQL_URL` for the database and `LIBSQL_AUTH_TOKEN` for the token:
+
+```json
+"env": {
+  "LIBSQL_URL": "libsql://your-db.turso.io",
+  "LIBSQL_AUTH_TOKEN": "your-token"
+}
+```
+
+### Mounted secret file (Docker, Kubernetes)
+
+Keeps the token out of the environment and out of every config file. Point
+`LIBSQL_AUTH_TOKEN_FILE` at a file that contains only the token:
+
+```json
+"env": {
+  "LIBSQL_URL": "libsql://your-db.turso.io",
+  "LIBSQL_AUTH_TOKEN_FILE": "/run/secrets/libsql_token"
+}
+```
+
+### YAML config file
+
+Keeps the client entry down to two lines. Pass an absolute path, since the
+working directory at launch is unpredictable. The token goes in the
+`password` field:
+
+```json
+"args": ["-y", "@database-mcp/libsql", "--config", "/absolute/path/database-mcp.yaml"]
+```
+
+```yaml
+# /absolute/path/database-mcp.yaml
+connection:
+  dsn: libsql://your-db.turso.io
+  password: ${LIBSQL_AUTH_TOKEN} # expanded from the environment at load time
+  # or read it from a mounted file instead:
+  # password_file: /run/secrets/libsql_token
+
+guardrails:
+  readOnly: true
+  maxRows: 1000
+  queryTimeoutMs: 30000
+```
+
+Never write a literal token into the YAML file. Use `${VAR}` expansion or
+`password_file` as shown.
+
+### Checking the result
+
+Run the server with `--print-config` to see exactly what it resolved. The
+token always prints as `***`.
 
 ## Tools
 
-- **`execute_sql`** `{ sql }` — run a single SQL statement.
-- **`search_objects`** `{ table? }` — list tables, or describe one (columns,
+- **`execute_sql`** `{ sql }` runs a single SQL statement.
+- **`search_objects`** `{ table? }` lists tables, or describes one (columns,
   indexes, foreign keys).
 
 ## Guardrails (defaults)
@@ -42,10 +100,10 @@ everything in YAML via `--config` (values support `${VAR}` expansion).
 | Row cap       | 1000     | `--max-rows` / `MAX_ROWS`                 |
 | Query timeout | 30000 ms | `--query-timeout-ms` / `QUERY_TIMEOUT_MS` |
 
-**Read-only on remote servers:** the SQL guard blocks mutating statements,
-and local files additionally enforce `PRAGMA query_only`. Remote servers may
-not honor per-session pragmas — for hard protection, connect with a
-**read-only auth token** (Turso supports these natively).
+The SQL guard blocks mutating statements, and local files additionally
+enforce `PRAGMA query_only`. Remote servers may not honor per-session
+pragmas, so for hard protection connect with a read-only auth token. Turso
+supports these natively.
 
 ## Part of database-mcp
 

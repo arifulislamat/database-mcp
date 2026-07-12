@@ -4,8 +4,8 @@ Engine-agnostic core for [database-mcp](https://github.com/arifulislamat/databas
 MCP servers: the protocol layer, the `DatabaseAdapter` interface, guardrails,
 config loading, and the SQL guard.
 
-You probably want an engine package instead — `@database-mcp/sqlite`,
-`@database-mcp/mysql`, ... — each of which is a thin adapter on top of this core.
+You probably want an engine package instead (`@database-mcp/sqlite`,
+`@database-mcp/mysql`, and so on). Each is a thin adapter on top of this core.
 
 ## Writing an engine package
 
