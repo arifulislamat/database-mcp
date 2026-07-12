@@ -8,13 +8,16 @@ guardrails on by default: read-only mode, row caps, and statement timeouts.
 
 ## Packages
 
-| Engine   | TypeScript (npm)         | Status  |
+| Engine   | TypeScript (npm)         | Version |
 | -------- | ------------------------ | ------- |
-| SQLite   | `@database-mcp/sqlite`   | planned |
-| libSQL   | `@database-mcp/libsql`   | planned |
-| MySQL    | `@database-mcp/mysql`    | planned |
-| MariaDB  | `@database-mcp/mariadb`  | planned |
-| Postgres | `@database-mcp/postgres` | planned |
+| SQLite   | [`@database-mcp/sqlite`](https://www.npmjs.com/package/@database-mcp/sqlite)   | 0.2.0 |
+| libSQL   | [`@database-mcp/libsql`](https://www.npmjs.com/package/@database-mcp/libsql)   | 0.2.0 |
+| MySQL    | [`@database-mcp/mysql`](https://www.npmjs.com/package/@database-mcp/mysql)    | 0.2.1 |
+| MariaDB  | [`@database-mcp/mariadb`](https://www.npmjs.com/package/@database-mcp/mariadb)  | 0.2.0 |
+| Postgres | [`@database-mcp/postgres`](https://www.npmjs.com/package/@database-mcp/postgres) | 0.2.0 |
+
+All five are published, provenance-attested, and pass the shared conformance
+suite against real databases in CI.
 
 Python, Go, and Rust implementations are planned once the TypeScript line is
 complete. All packages, in every language, pass the same language-agnostic
@@ -39,18 +42,23 @@ conformance suite, so behavior is identical everywhere.
 
 ## Quick start
 
-Coming with the first release (`@database-mcp/sqlite`).
+Pick your engine's package; each README has the full config surface. SQLite:
 
 ```json
 {
   "mcpServers": {
-    "database-mcp": {
+    "sqlite": {
       "command": "npx",
-      "args": ["@database-mcp/sqlite", "--dsn", "/absolute/path/to/database.db"]
+      "args": ["-y", "@database-mcp/sqlite", "--dsn", "/absolute/path/to/database.db"]
     }
   }
 }
 ```
+
+Networked engines take credentials from the environment (`MYSQL_*`,
+`MARIADB_*`, `POSTGRES_*`/`DATABASE_URL`, `LIBSQL_URL`/`LIBSQL_AUTH_TOKEN`),
+`*_FILE` mounted secrets, or a YAML file via `--config` — never from a chat
+prompt.
 
 ## Contributing
 
