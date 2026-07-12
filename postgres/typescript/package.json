@@ -1,6 +1,6 @@
 {
   "name": "@database-mcp/postgres",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "MCP server for PostgreSQL with read-only guardrails, row caps, and statement timeouts",
   "license": "MIT",
   "type": "module",
@@ -30,7 +30,7 @@
     "sql"
   ],
   "dependencies": {
-    "@database-mcp/core": "^0.2.2",
+    "@database-mcp/core": "^0.3.0",
     "pg": "^8.22.0"
   },
   "devDependencies": {
