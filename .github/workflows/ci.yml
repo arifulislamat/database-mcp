@@ -23,6 +23,20 @@ jobs:
           --health-interval 5s
           --health-timeout 3s
           --health-retries 20
+      mariadb:
+        image: mariadb:11
+        env:
+          MARIADB_ROOT_PASSWORD: root
+          MARIADB_DATABASE: conformance
+          MARIADB_USER: mcp
+          MARIADB_PASSWORD: mcp-password
+        ports:
+          - 3307:3306
+        options: >-
+          --health-cmd "healthcheck.sh --connect --innodb_initialized"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

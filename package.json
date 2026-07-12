@@ -6,11 +6,12 @@
     "sqlite/typescript",
     "libsql/typescript",
     "mysql/typescript",
+    "mariadb/typescript",
     "conformance"
   ],
   "scripts": {
-    "build": "npm run build -w @database-mcp/core && npm run build -w @database-mcp/sqlite && npm run build -w @database-mcp/libsql && npm run build -w @database-mcp/mysql",
-    "conformance": "node conformance/run.mjs -- node sqlite/typescript/dist/index.js && node conformance/run.mjs -- node libsql/typescript/dist/index.js && node conformance/run.mjs --engine mysql -- node mysql/typescript/dist/index.js",
+    "build": "npm run build -w @database-mcp/core && npm run build -w @database-mcp/sqlite && npm run build -w @database-mcp/libsql && npm run build -w @database-mcp/mysql && npm run build -w @database-mcp/mariadb",
+    "conformance": "node conformance/run.mjs -- node sqlite/typescript/dist/index.js && node conformance/run.mjs -- node libsql/typescript/dist/index.js && node conformance/run.mjs --engine mysql -- node mysql/typescript/dist/index.js && node conformance/run.mjs --engine mariadb -- node mariadb/typescript/dist/index.js",
     "test": "npm test -w @database-mcp/core",
     "leak-check": "node conformance/leak-libsql.mjs && node conformance/leak-mysql.mjs"
   },

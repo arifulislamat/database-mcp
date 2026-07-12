@@ -14,3 +14,18 @@ services:
       interval: 5s
       timeout: 3s
       retries: 20
+
+  mariadb:
+    image: mariadb:11
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: conformance
+      MARIADB_USER: mcp
+      MARIADB_PASSWORD: mcp-password
+    ports:
+      - "3307:3306"
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
