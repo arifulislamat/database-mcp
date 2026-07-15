@@ -66,6 +66,9 @@ jobs:
       - name: Tests
         run: |
           if [ -f package.json ]; then npm test; else echo "skipping"; fi
+      - name: Version sync check
+        run: |
+          if [ -f scripts/bump-version.mjs ]; then node scripts/bump-version.mjs --check; fi
       - name: Conformance
         run: |
           if [ -f conformance/run.mjs ]; then

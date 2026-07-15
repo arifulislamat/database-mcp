@@ -16,10 +16,15 @@ Implement `DatabaseAdapter`, then:
 ```ts
 #!/usr/bin/env node
 import { loadConfig, serve } from "@database-mcp/core";
+import { createRequire } from "node:module";
 import { MyAdapter } from "./adapter.js";
 
-const config = loadConfig(process.argv.slice(2), process.env, { dsnEnvVar: "MYENGINE_DSN" });
-await serve(new MyAdapter(config.dsn), config, "0.1.0");
+const { version } = createRequire(import.meta.url)("../package.json");
+const config = loadConfig(process.argv.slice(2), process.env, {
+  envPrefix: "MYENGINE",
+  dsnEnvVar: "MYENGINE_DSN",
+});
+await serve(new MyAdapter(config.connection), config, version);
 ```
 
 Conformance is the definition of done: your package is correct when the shared

@@ -6,7 +6,7 @@ body:
     id: package
     attributes:
       label: Package
-      placeholder: "@database-mcp/sqlite 0.1.0"
+      placeholder: "@database-mcp/sqlite x.y.z (npm ls @database-mcp/sqlite)"
     validations:
       required: true
   - type: input
