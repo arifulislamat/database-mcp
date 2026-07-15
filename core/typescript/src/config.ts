@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { parse as parseYaml } from "yaml";
-import { Secret, registerSecret } from "./secret.js";
+import { Secret, redact, registerSecret } from "./secret.js";
 
 export interface Guardrails {
   readOnly: boolean;
@@ -135,9 +135,12 @@ export function loadConfig(argv: string[], env: NodeJS.ProcessEnv, opts: ConfigO
     },
   };
 
-  // Debug aid; goes through the redacting serializer (Secret.toJSON = "***").
+  // Debug aid. Secret.toJSON handles the password field; redact() masks
+  // DSN-embedded credentials, which are plain strings (issue #18) — this
+  // print happens before serve() installs the stderr filter, and goes to
+  // stdout anyway.
   if (argv.includes("--print-config")) {
-    console.log(JSON.stringify(config, null, 2));
+    console.log(redact(JSON.stringify(config, null, 2)));
     process.exit(0);
   }
 

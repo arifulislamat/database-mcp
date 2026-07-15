@@ -29,13 +29,20 @@ const scenarios = [
   { name: "*_FILE", env: { ...base, POSTGRES_PASSWORD_FILE: pwFile } },
   { name: "yaml ${VAR}", env: { LEAK_TEST_PW: SECRET, DB_MCP_CONFIG: yamlFile } },
   { name: "inline DSN", env: { DATABASE_URL: `postgres://mcp:${SECRET}@${HOST}:5432/conformance` } },
+  // Issue #18: --print-config exits before serve() installs the stderr
+  // filter and writes to stdout; the dump must be redacted on its own.
+  {
+    name: "--print-config with DSN",
+    env: { DATABASE_URL: `postgres://mcp:${SECRET}@${HOST}:5432/conformance` },
+    args: ["--print-config"],
+  },
 ];
 
 let failures = 0;
 for (const s of scenarios) {
   const r = spawnSync(
     "node",
-    [join(here, "leak-check.mjs"), "--secret", SECRET, "--", "node", server],
+    [join(here, "leak-check.mjs"), "--secret", SECRET, "--", "node", server, ...(s.args ?? [])],
     { env: { ...process.env, ...s.env }, encoding: "utf8" },
   );
   const ok = r.status === 0;

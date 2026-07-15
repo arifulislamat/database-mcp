@@ -1,5 +1,6 @@
 import type { DatabaseAdapter } from "../adapter.js";
 import type { Guardrails } from "../config.js";
+import { redact } from "../secret.js";
 import { guardSql } from "../sql-guard.js";
 
 type ToolResult = { content: { type: "text"; text: string }[]; isError?: boolean };
@@ -21,7 +22,9 @@ function sanitizeError(e: unknown): string {
   if (/inactivity timeout|PROTOCOL_SEQUENCE_TIMEOUT|statement timeout/i.test(message)) {
     return "timeout: query exceeded the configured queryTimeoutMs";
   }
-  return message;
+  // Tool results travel over stdout (the MCP stream), which the stderr
+  // redaction filter cannot cover — mask driver messages here too.
+  return redact(message);
 }
 
 export function makeExecuteSql(adapter: DatabaseAdapter, guardrails: Guardrails) {
