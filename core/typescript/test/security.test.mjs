@@ -74,6 +74,13 @@ test("config: inline DSN password gets registered for redaction", () => {
   assert.equal(redact("log with dsn-inline-pw inside"), "log with *** inside");
 });
 
+test("config: a serialized config dump never contains the DSN password (issue #18)", () => {
+  const config = loadConfig([], { DATABASE_URL: "postgres://myuser:supersecret18@localhost:5432/mydb" }, { envPrefix: "POSTGRES", dsnEnvVar: "DATABASE_URL" });
+  const printed = redact(JSON.stringify(config, null, 2));
+  assert.ok(!printed.includes("supersecret18"), "password leaked into config dump");
+  assert.ok(printed.includes("postgres://myuser:***@localhost:5432/mydb"));
+});
+
 test("config: transport defaults to stdio, flags select http", () => {
   const a = loadConfig(["--dsn", "/x.db"], {}, { envPrefix: "SQLITE" });
   assert.deepEqual(a.transport, { type: "stdio", port: 8080 });

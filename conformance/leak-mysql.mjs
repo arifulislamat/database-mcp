@@ -31,13 +31,18 @@ const scenarios = [
   { name: "*_FILE", env: { ...base, MYSQL_PASSWORD_FILE: pwFile } },
   { name: "yaml ${VAR}", env: { LEAK_TEST_PW: SECRET, DB_MCP_CONFIG: yamlFile } },
   { name: "inline DSN", env: { MYSQL_DSN: `mysql://mcp:${SECRET}@${HOST}:3306/conformance` } },
+  {
+    name: "--print-config with DSN",
+    env: { MYSQL_DSN: `mysql://mcp:${SECRET}@${HOST}:3306/conformance` },
+    args: ["--print-config"],
+  },
 ];
 
 let failures = 0;
 for (const s of scenarios) {
   const r = spawnSync(
     "node",
-    [join(here, "leak-check.mjs"), "--secret", SECRET, "--", "node", server],
+    [join(here, "leak-check.mjs"), "--secret", SECRET, "--", "node", server, ...(s.args ?? [])],
     { env: { ...process.env, ...s.env }, encoding: "utf8" },
   );
   const ok = r.status === 0;
