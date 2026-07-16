@@ -1,4 +1,4 @@
 # Virtual uv workspace root for the Python line. The npm workspace (package.json)
 # and this coexist; each language line has its own toolchain.
 [tool.uv.workspace]
-members = ["core/python", "sqlite/python", "libsql/python", "mysql/python", "mariadb/python"]
+members = ["core/python", "sqlite/python", "libsql/python", "mysql/python", "mariadb/python", "postgres/python"]
