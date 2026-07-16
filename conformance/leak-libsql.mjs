@@ -11,7 +11,11 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
-const server = join(here, "..", "libsql", "typescript", "dist", "index.js");
+// Default target is the TypeScript server; pass a launch command after --
+// to test another implementation (e.g. -- uv run database-mcp-libsql).
+const sep = process.argv.indexOf("--");
+const serverCmd =
+  sep >= 0 ? process.argv.slice(sep + 1) : ["node", join(here, "..", "libsql", "typescript", "dist", "index.js")];
 const SECRET = "leak-canary-6b2f0d5e8a";
 const URL = "http://127.0.0.1:9"; // discard port: fails fast, exercises the error path
 
@@ -31,7 +35,7 @@ let failures = 0;
 for (const s of scenarios) {
   const r = spawnSync(
     "node",
-    [join(here, "leak-check.mjs"), "--secret", SECRET, "--", "node", server],
+    [join(here, "leak-check.mjs"), "--secret", SECRET, "--", ...serverCmd],
     { env: { ...process.env, ...s.env }, encoding: "utf8" },
   );
   const ok = r.status === 0;
