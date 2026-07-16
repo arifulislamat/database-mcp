@@ -1,11 +1,13 @@
 #!/usr/bin/env node
-// Single source of truth for a package's version is its package.json.
-// This script keeps every derived reference in sync, and --check makes CI
-// fail when anything drifts.
+// Single source of truth for a package's version is its manifest
+// (package.json for TypeScript, pyproject.toml for Python). This script
+// keeps every derived reference in sync, and --check makes CI fail when
+// anything drifts.
 //
-//   node scripts/bump-version.mjs <core|sqlite|libsql|mysql|mariadb|postgres> <version>
-//     Sets package.json version, syncs server.json (engines), verifies the
-//     CHANGELOG has a matching heading, and prints the release tag command.
+//   node scripts/bump-version.mjs <core|sqlite|libsql|mysql|mariadb|postgres> <version> [--lang ts|py]
+//     Sets the manifest version (default ts), syncs server.json (ts
+//     engines), verifies the CHANGELOG has a matching heading, and prints
+//     the release tag command.
 //
 //   node scripts/bump-version.mjs --check
 //     Verifies server.json versions match package.json for every engine.
@@ -32,10 +34,39 @@ if (process.argv[2] === "--check") {
   process.exit(drift === 0 ? 0 : 1);
 }
 
-const [pkg, version] = process.argv.slice(2);
-if (!pkg || !/^\d+\.\d+\.\d+$/.test(version ?? "") || (pkg !== "core" && !ENGINES.includes(pkg))) {
-  console.error("usage: node scripts/bump-version.mjs <core|" + ENGINES.join("|") + "> <x.y.z>  |  --check");
+const args = process.argv.slice(2);
+const langIdx = args.indexOf("--lang");
+const lang = langIdx >= 0 ? args.splice(langIdx, 2)[1] : "ts";
+const [pkg, version] = args;
+if (
+  !pkg ||
+  !/^\d+\.\d+\.\d+$/.test(version ?? "") ||
+  (pkg !== "core" && !ENGINES.includes(pkg)) ||
+  !["ts", "py"].includes(lang)
+) {
+  console.error("usage: node scripts/bump-version.mjs <core|" + ENGINES.join("|") + "> <x.y.z> [--lang ts|py]  |  --check");
   process.exit(2);
+}
+
+if (lang === "py") {
+  const pyPath = `${pkg}/python/pyproject.toml`;
+  const toml = readFileSync(pyPath, "utf8");
+  const updated = toml.replace(/^version = "[^"]+"$/m, `version = "${version}"`);
+  if (updated === toml && !toml.includes(`version = "${version}"`)) {
+    console.error(`ERROR: could not find a version line in ${pyPath}`);
+    process.exit(1);
+  }
+  writeFileSync(pyPath, updated);
+  console.log(`${pyPath}: version -> ${version}`);
+
+  const changelog = readFileSync(`${pkg}/python/CHANGELOG.md`, "utf8");
+  if (!changelog.includes(`## ${version}`)) {
+    console.error(`WARNING: ${pkg}/python/CHANGELOG.md has no "## ${version}" section yet, add it before tagging.`);
+  }
+
+  console.log(`\nnext: uv sync && uv run pytest core/python/tests && node conformance/run.mjs -- uv run database-mcp-${pkg === "core" ? "sqlite" : pkg}`);
+  console.log(`tag:  git tag -s ${pkg}-py-v${version} -m "database-mcp-${pkg} ${version}" && git push origin ${pkg}-py-v${version}`);
+  process.exit(0);
 }
 
 const pkgPath = `${pkg}/typescript/package.json`;
