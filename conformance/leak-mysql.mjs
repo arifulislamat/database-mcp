@@ -12,7 +12,11 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
-const server = join(here, "..", "mysql", "typescript", "dist", "index.js");
+// Default target is the TypeScript server; pass a launch command after --
+// to test another implementation (e.g. -- uv run database-mcp-mysql).
+const sep = process.argv.indexOf("--");
+const serverCmd =
+  sep >= 0 ? process.argv.slice(sep + 1) : ["node", join(here, "..", "mysql", "typescript", "dist", "index.js")];
 const SECRET = "mysql-leak-canary-4e9d21c7b3";
 const HOST = process.env.MYSQL_HOST ?? "127.0.0.1";
 
@@ -42,7 +46,7 @@ let failures = 0;
 for (const s of scenarios) {
   const r = spawnSync(
     "node",
-    [join(here, "leak-check.mjs"), "--secret", SECRET, "--", "node", server, ...(s.args ?? [])],
+    [join(here, "leak-check.mjs"), "--secret", SECRET, "--", ...serverCmd, ...(s.args ?? [])],
     { env: { ...process.env, ...s.env }, encoding: "utf8" },
   );
   const ok = r.status === 0;
