@@ -6,12 +6,51 @@
     "url": "https://github.com/arifulislamat/database-mcp",
     "source": "github"
   },
-  "version": "0.4.1",
+  "version": "0.4.2",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "@database-mcp/mysql",
-      "version": "0.4.1",
+      "version": "0.4.2",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "MYSQL_HOST",
+          "description": "Database host",
+          "isRequired": true,
+          "format": "string",
+          "isSecret": false
+        },
+        {
+          "name": "MYSQL_USER",
+          "description": "Database user (a read-only user is recommended)",
+          "isRequired": true,
+          "format": "string",
+          "isSecret": false
+        },
+        {
+          "name": "MYSQL_PASSWORD",
+          "description": "Database password (or use MYSQL_PASSWORD_FILE)",
+          "isRequired": false,
+          "format": "string",
+          "isSecret": true
+        },
+        {
+          "name": "MYSQL_DATABASE",
+          "description": "Database name",
+          "isRequired": true,
+          "format": "string",
+          "isSecret": false
+        }
+      ]
+    },
+    {
+      "registryType": "pypi",
+      "identifier": "database-mcp-mysql",
+      "version": "0.1.0",
+      "runtimeHint": "uvx",
       "transport": {
         "type": "stdio"
       },

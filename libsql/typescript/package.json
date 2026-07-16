@@ -1,6 +1,6 @@
 {
   "name": "@database-mcp/libsql",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "MCP server for libSQL/Turso (local files and remote databases) with read-only guardrails, row caps, and statement timeouts",
   "license": "MIT",
   "type": "module",

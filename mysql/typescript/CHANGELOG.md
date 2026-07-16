@@ -4,6 +4,10 @@ Behavior inherited from core (config, guardrails, transports, secret
 handling) is tracked in the
 [@database-mcp/core changelog](https://github.com/arifulislamat/database-mcp/blob/main/core/typescript/CHANGELOG.md).
 
+## 0.4.2
+
+- MCP Registry entry now lists the PyPI package (database-mcp-mysql) alongside npm. No code changes.
+
 ## 0.4.1
 
 - MCP Registry metadata (mcpName, server.json). No behavior change.
