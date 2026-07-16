@@ -82,6 +82,21 @@ jobs:
 
   python:
     runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: conformance
+          MYSQL_USER: mcp
+          MYSQL_PASSWORD: mcp-password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "mysqladmin ping -h localhost"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
     steps:
       - uses: actions/checkout@v7
       # Node runs the language-agnostic conformance suite.
@@ -103,3 +118,7 @@ jobs:
         run: node conformance/run.mjs -- uv run database-mcp-libsql
       - name: Secret leak check (libsql)
         run: node conformance/leak-libsql.mjs -- uv run database-mcp-libsql
+      - name: Conformance (mysql)
+        run: node conformance/run.mjs --engine mysql -- uv run database-mcp-mysql
+      - name: Secret leak check (mysql)
+        run: node conformance/leak-mysql.mjs -- uv run database-mcp-mysql
