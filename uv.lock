@@ -12,6 +12,7 @@ resolution-markers = [
 members = [
     "database-mcp-core",
     "database-mcp-libsql",
+    "database-mcp-mariadb",
     "database-mcp-mysql",
     "database-mcp-sqlite",
 ]
@@ -267,6 +268,21 @@ dependencies = [
 requires-dist = [
     { name = "database-mcp-core", editable = "core/python" },
     { name = "libsql", specifier = ">=0.1.11" },
+]
+
+[[package]]
+name = "database-mcp-mariadb"
+version = "0.1.0"
+source = { editable = "mariadb/python" }
+dependencies = [
+    { name = "database-mcp-core" },
+    { name = "database-mcp-mysql" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "database-mcp-core", editable = "core/python" },
+    { name = "database-mcp-mysql", editable = "mysql/python" },
 ]
 
 [[package]]
