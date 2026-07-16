@@ -79,3 +79,23 @@ jobs:
       - name: Secret leak check
         run: |
           if [ -f conformance/leak-libsql.mjs ]; then npm run leak-check; fi
+
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      # Node runs the language-agnostic conformance suite.
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - uses: astral-sh/setup-uv@v6
+      - name: Install
+        run: |
+          npm ci
+          uv sync
+      - name: Tests
+        run: uv run pytest core/python/tests
+      - name: Conformance (sqlite, stdio)
+        run: node conformance/run.mjs -- uv run database-mcp-sqlite
+      - name: Conformance (sqlite, http)
+        run: node conformance/run.mjs --transport http -- uv run database-mcp-sqlite
