@@ -61,3 +61,7 @@ guardrails:
   are aborted.
 
 Full contract: [docs/tool-contract.md](https://github.com/arifulislamat/database-mcp/blob/main/docs/tool-contract.md)
+
+---
+
+mcp-name: io.github.arifulislamat/database-mcp-sqlite

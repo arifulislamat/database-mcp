@@ -1,0 +1,60 @@
+name: Release (Python)
+
+# Tag-triggered only, never per-merge. The tag prefix selects the package:
+#   sqlite-py-v0.1.0 -> database-mcp-sqlite,  core-py-v0.2.0 -> database-mcp-core, ...
+on:
+  push:
+    tags:
+      - "*-py-v*"
+
+permissions:
+  contents: write
+  id-token: write # PyPI trusted publishing, no long-lived token
+
+jobs:
+  parse:
+    runs-on: ubuntu-latest
+    outputs:
+      package: ${{ steps.tag.outputs.package }}
+      version: ${{ steps.tag.outputs.version }}
+    steps:
+      - name: Parse tag
+        id: tag
+        run: |
+          # <pkg>-py-v<version>
+          TAG="${GITHUB_REF_NAME}"
+          echo "package=${TAG%-py-v*}" >> "$GITHUB_OUTPUT"
+          echo "version=${TAG##*-py-v}" >> "$GITHUB_OUTPUT"
+
+  publish:
+    needs: parse
+    runs-on: ubuntu-latest
+    # One environment per package: PyPI trusted publishers require a unique
+    # (repo, workflow, environment) tuple per project, and this is also the
+    # dedicated-publishing-environment setup PyPI recommends.
+    environment: pypi-${{ needs.parse.outputs.package }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - uses: astral-sh/setup-uv@v6
+      - name: Install
+        run: |
+          npm ci
+          uv sync
+      - name: Version matches tag
+        run: |
+          grep -q "^version = \"${{ needs.parse.outputs.version }}\"$" \
+            "${{ needs.parse.outputs.package }}/python/pyproject.toml" \
+            || { echo "pyproject.toml version does not match the tag; run scripts/bump-version.mjs first"; exit 1; }
+      - name: Conformance (never publish unverified code)
+        run: node conformance/run.mjs -- uv run database-mcp-sqlite
+      - name: Build
+        run: uv build --package database-mcp-${{ needs.parse.outputs.package }}
+      - name: Publish
+        run: uv publish
+      - name: GitHub release
+        run: gh release create "$GITHUB_REF_NAME" --generate-notes
+        env:
+          GH_TOKEN: ${{ github.token }}
