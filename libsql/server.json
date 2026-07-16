@@ -6,12 +6,37 @@
     "url": "https://github.com/arifulislamat/database-mcp",
     "source": "github"
   },
-  "version": "0.4.1",
+  "version": "0.4.2",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "@database-mcp/libsql",
-      "version": "0.4.1",
+      "version": "0.4.2",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "LIBSQL_URL",
+          "description": "Database URL (file path or libsql://... remote)",
+          "isRequired": true,
+          "format": "string",
+          "isSecret": false
+        },
+        {
+          "name": "LIBSQL_AUTH_TOKEN",
+          "description": "Auth token for remote libSQL/Turso databases",
+          "isRequired": false,
+          "format": "string",
+          "isSecret": true
+        }
+      ]
+    },
+    {
+      "registryType": "pypi",
+      "identifier": "database-mcp-libsql",
+      "version": "0.1.0",
+      "runtimeHint": "uvx",
       "transport": {
         "type": "stdio"
       },

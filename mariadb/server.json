@@ -6,12 +6,51 @@
     "url": "https://github.com/arifulislamat/database-mcp",
     "source": "github"
   },
-  "version": "0.4.1",
+  "version": "0.4.2",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "@database-mcp/mariadb",
-      "version": "0.4.1",
+      "version": "0.4.2",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "MARIADB_HOST",
+          "description": "Database host",
+          "isRequired": true,
+          "format": "string",
+          "isSecret": false
+        },
+        {
+          "name": "MARIADB_USER",
+          "description": "Database user (a read-only user is recommended)",
+          "isRequired": true,
+          "format": "string",
+          "isSecret": false
+        },
+        {
+          "name": "MARIADB_PASSWORD",
+          "description": "Database password (or use MARIADB_PASSWORD_FILE)",
+          "isRequired": false,
+          "format": "string",
+          "isSecret": true
+        },
+        {
+          "name": "MARIADB_DATABASE",
+          "description": "Database name",
+          "isRequired": true,
+          "format": "string",
+          "isSecret": false
+        }
+      ]
+    },
+    {
+      "registryType": "pypi",
+      "identifier": "database-mcp-mariadb",
+      "version": "0.1.0",
+      "runtimeHint": "uvx",
       "transport": {
         "type": "stdio"
       },

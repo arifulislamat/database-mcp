@@ -6,12 +6,30 @@
     "url": "https://github.com/arifulislamat/database-mcp",
     "source": "github"
   },
-  "version": "0.4.1",
+  "version": "0.4.2",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "@database-mcp/sqlite",
-      "version": "0.4.1",
+      "version": "0.4.2",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "SQLITE_PATH",
+          "description": "Path to the SQLite database file",
+          "isRequired": true,
+          "format": "string",
+          "isSecret": false
+        }
+      ]
+    },
+    {
+      "registryType": "pypi",
+      "identifier": "database-mcp-sqlite",
+      "version": "0.1.0",
+      "runtimeHint": "uvx",
       "transport": {
         "type": "stdio"
       },

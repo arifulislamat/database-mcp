@@ -19,15 +19,25 @@ const ENGINES = ["sqlite", "libsql", "mysql", "mariadb", "postgres"];
 const read = (p) => JSON.parse(readFileSync(p, "utf8"));
 const write = (p, obj) => writeFileSync(p, JSON.stringify(obj, null, 2) + "\n");
 
+const pyVersion = (pkg) => readFileSync(`${pkg}/python/pyproject.toml`, "utf8").match(/^version = "([^"]+)"$/m)?.[1];
+
 if (process.argv[2] === "--check") {
   let drift = 0;
   for (const e of ENGINES) {
     const pkg = read(`${e}/typescript/package.json`).version;
-    const server = read(`${e}/typescript/server.json`);
-    const bad = [server.version, server.packages?.[0]?.version].filter((v) => v !== pkg);
+    const server = read(`${e}/server.json`);
+    const npmVersions = server.packages.filter((p) => p.registryType === "npm").map((p) => p.version);
+    const bad = [server.version, ...npmVersions].filter((v) => v !== pkg);
     if (bad.length) {
       drift++;
-      console.error(`DRIFT ${e}: package.json=${pkg} server.json=${server.version}/${server.packages?.[0]?.version}`);
+      console.error(`DRIFT ${e}: package.json=${pkg} server.json=${server.version}/${npmVersions}`);
+    }
+    const py = existsSync(`${e}/python/pyproject.toml`) ? pyVersion(e) : undefined;
+    for (const p of server.packages.filter((p) => p.registryType === "pypi")) {
+      if (p.version !== py) {
+        drift++;
+        console.error(`DRIFT ${e}: pyproject.toml=${py} server.json pypi entry=${p.version}`);
+      }
     }
   }
   console.log(drift === 0 ? "version check: all server.json in sync with package.json" : `version check: ${drift} package(s) drifted`);
@@ -59,6 +69,14 @@ if (lang === "py") {
   writeFileSync(pyPath, updated);
   console.log(`${pyPath}: version -> ${version}`);
 
+  const serverPath = `${pkg}/server.json`;
+  if (existsSync(serverPath)) {
+    const server = read(serverPath);
+    for (const p of server.packages.filter((p) => p.registryType === "pypi")) p.version = version;
+    write(serverPath, server);
+    console.log(`${serverPath}: pypi entry -> ${version}`);
+  }
+
   const changelog = readFileSync(`${pkg}/python/CHANGELOG.md`, "utf8");
   if (!changelog.includes(`## ${version}`)) {
     console.error(`WARNING: ${pkg}/python/CHANGELOG.md has no "## ${version}" section yet, add it before tagging.`);
@@ -75,11 +93,11 @@ manifest.version = version;
 write(pkgPath, manifest);
 console.log(`${pkgPath}: version -> ${version}`);
 
-const serverPath = `${pkg}/typescript/server.json`;
+const serverPath = `${pkg}/server.json`;
 if (existsSync(serverPath)) {
   const server = read(serverPath);
   server.version = version;
-  if (server.packages?.[0]) server.packages[0].version = version;
+  for (const p of server.packages.filter((p) => p.registryType === "npm")) p.version = version;
   write(serverPath, server);
   console.log(`${serverPath}: version -> ${version}`);
 }
@@ -91,4 +109,4 @@ if (!changelog.includes(`## ${version}`)) {
 
 console.log(`\nnext: npm install && npm run build && npm test && npm run conformance`);
 console.log(`tag:  git tag -s ${pkg}-ts-v${version} -m "@database-mcp/${pkg} ${version}" && git push origin ${pkg}-ts-v${version}`);
-console.log(`then: mcp-publisher publish (from ${pkg}/typescript) to update the MCP Registry`);
+console.log(`then: mcp-publisher publish (from ${pkg}/) to update the MCP Registry`);
