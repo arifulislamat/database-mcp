@@ -99,3 +99,7 @@ jobs:
         run: node conformance/run.mjs -- uv run database-mcp-sqlite
       - name: Conformance (sqlite, http)
         run: node conformance/run.mjs --transport http -- uv run database-mcp-sqlite
+      - name: Conformance (libsql)
+        run: node conformance/run.mjs -- uv run database-mcp-libsql
+      - name: Secret leak check (libsql)
+        run: node conformance/leak-libsql.mjs -- uv run database-mcp-libsql
