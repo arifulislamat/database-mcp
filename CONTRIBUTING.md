@@ -18,14 +18,29 @@ Thanks for your interest in contributing.
 
 ## Running the conformance suite locally
 
+The suite itself runs on Node and validates servers in any language.
+
+TypeScript servers:
+
 ```bash
 npm install
 npm run build
-node conformance/run.mjs -- <command to launch the server> [args...]
+node conformance/run.mjs -- node sqlite/typescript/dist/index.js
 ```
 
+Python servers (a [uv](https://docs.astral.sh/uv/) workspace):
+
+```bash
+npm install          # the conformance suite runs on Node
+uv sync
+uv run pytest core/python/tests
+node conformance/run.mjs -- uv run database-mcp-sqlite
+```
+
+General form: `node conformance/run.mjs [--engine <engine>] [--transport http] -- <command to launch the server> [args...]`.
+
 SQLite needs no infrastructure (the suite seeds a temp file). Networked
-engines (MySQL, MariaDB, Postgres) use `docker-compose up -d` first.
+engines (MySQL, MariaDB, Postgres) use `docker compose up -d` first.
 
 ## Project structure
 
