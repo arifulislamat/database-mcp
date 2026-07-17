@@ -3,30 +3,33 @@
 [![CI](https://github.com/arifulislamat/database-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/arifulislamat/database-mcp/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/github/license/arifulislamat/database-mcp)](LICENSE)
 [![npm](https://img.shields.io/npm/v/%40database-mcp%2Fcore?label=%40database-mcp%2Fcore)](https://www.npmjs.com/package/@database-mcp/core)
+[![PyPI](https://img.shields.io/pypi/v/database-mcp-core?label=database-mcp-core)](https://pypi.org/project/database-mcp-core/)
 [![Node >= 20](https://img.shields.io/node/v/%40database-mcp%2Fcore)](https://nodejs.org)
 
 MCP servers that give AI clients safe, structured access to SQL databases.
 
-One installable package per database engine. Every package exposes the same
-minimal two-tool surface, `execute_sql` and `search_objects`, with
-guardrails on by default: read-only mode, row caps, and statement timeouts.
+One installable package per database engine, in TypeScript (npm) and Python
+(PyPI). Every package exposes the same minimal two-tool surface,
+`execute_sql` and `search_objects`, with guardrails on by default: read-only
+mode, row caps, and statement timeouts.
 
 ## Packages
 
-| Engine   | TypeScript (npm)         | Version |
-| -------- | ------------------------ | ------- |
-| SQLite   | [`@database-mcp/sqlite`](https://www.npmjs.com/package/@database-mcp/sqlite)   | [![npm](https://img.shields.io/npm/v/%40database-mcp%2Fsqlite?label=)](https://www.npmjs.com/package/@database-mcp/sqlite) |
-| libSQL   | [`@database-mcp/libsql`](https://www.npmjs.com/package/@database-mcp/libsql)   | [![npm](https://img.shields.io/npm/v/%40database-mcp%2Flibsql?label=)](https://www.npmjs.com/package/@database-mcp/libsql) |
-| MySQL    | [`@database-mcp/mysql`](https://www.npmjs.com/package/@database-mcp/mysql)    | [![npm](https://img.shields.io/npm/v/%40database-mcp%2Fmysql?label=)](https://www.npmjs.com/package/@database-mcp/mysql) |
-| MariaDB  | [`@database-mcp/mariadb`](https://www.npmjs.com/package/@database-mcp/mariadb)  | [![npm](https://img.shields.io/npm/v/%40database-mcp%2Fmariadb?label=)](https://www.npmjs.com/package/@database-mcp/mariadb) |
-| Postgres | [`@database-mcp/postgres`](https://www.npmjs.com/package/@database-mcp/postgres) | [![npm](https://img.shields.io/npm/v/%40database-mcp%2Fpostgres?label=)](https://www.npmjs.com/package/@database-mcp/postgres) |
+| Engine   | TypeScript (npm) | Python (PyPI) |
+| -------- | ---------------- | ------------- |
+| SQLite   | [`@database-mcp/sqlite`](https://www.npmjs.com/package/@database-mcp/sqlite) [![npm](https://img.shields.io/npm/v/%40database-mcp%2Fsqlite?label=)](https://www.npmjs.com/package/@database-mcp/sqlite)   | [`database-mcp-sqlite`](https://pypi.org/project/database-mcp-sqlite/) [![PyPI](https://img.shields.io/pypi/v/database-mcp-sqlite?label=)](https://pypi.org/project/database-mcp-sqlite/)   |
+| libSQL   | [`@database-mcp/libsql`](https://www.npmjs.com/package/@database-mcp/libsql) [![npm](https://img.shields.io/npm/v/%40database-mcp%2Flibsql?label=)](https://www.npmjs.com/package/@database-mcp/libsql)   | [`database-mcp-libsql`](https://pypi.org/project/database-mcp-libsql/) [![PyPI](https://img.shields.io/pypi/v/database-mcp-libsql?label=)](https://pypi.org/project/database-mcp-libsql/)   |
+| MySQL    | [`@database-mcp/mysql`](https://www.npmjs.com/package/@database-mcp/mysql) [![npm](https://img.shields.io/npm/v/%40database-mcp%2Fmysql?label=)](https://www.npmjs.com/package/@database-mcp/mysql)    | [`database-mcp-mysql`](https://pypi.org/project/database-mcp-mysql/) [![PyPI](https://img.shields.io/pypi/v/database-mcp-mysql?label=)](https://pypi.org/project/database-mcp-mysql/)    |
+| MariaDB  | [`@database-mcp/mariadb`](https://www.npmjs.com/package/@database-mcp/mariadb) [![npm](https://img.shields.io/npm/v/%40database-mcp%2Fmariadb?label=)](https://www.npmjs.com/package/@database-mcp/mariadb)  | [`database-mcp-mariadb`](https://pypi.org/project/database-mcp-mariadb/) [![PyPI](https://img.shields.io/pypi/v/database-mcp-mariadb?label=)](https://pypi.org/project/database-mcp-mariadb/)  |
+| Postgres | [`@database-mcp/postgres`](https://www.npmjs.com/package/@database-mcp/postgres) [![npm](https://img.shields.io/npm/v/%40database-mcp%2Fpostgres?label=)](https://www.npmjs.com/package/@database-mcp/postgres) | [`database-mcp-postgres`](https://pypi.org/project/database-mcp-postgres/) [![PyPI](https://img.shields.io/pypi/v/database-mcp-postgres?label=)](https://pypi.org/project/database-mcp-postgres/) |
 
-All five are published, provenance-attested, and pass the shared conformance
-suite against real databases in CI.
+Both lines are published and pass the same language-agnostic conformance
+suite against real databases in CI, so behavior is identical regardless of
+language. Every engine is also listed on the
+[MCP Registry](https://registry.modelcontextprotocol.io) with both install
+options.
 
-Python, Go, and Rust implementations are planned once the TypeScript line is
-complete. All packages, in every language, pass the same language-agnostic
-conformance suite, so behavior is identical everywhere.
+Go and Rust implementations are planned.
 
 ## Design principles
 
@@ -47,7 +50,8 @@ conformance suite, so behavior is identical everywhere.
 
 ## Quick start
 
-Pick your engine's package; each README has the full config surface. SQLite:
+Pick your engine's package; each README has the full config surface. SQLite
+via npm:
 
 ```json
 {
@@ -59,6 +63,11 @@ Pick your engine's package; each README has the full config surface. SQLite:
   }
 }
 ```
+
+Or via PyPI: use `"command": "uvx"` and
+`"args": ["database-mcp-sqlite", "--dsn", "/absolute/path/to/database.db"]`.
+Flags, environment variables, and YAML config are identical across both
+lines.
 
 Networked engines take credentials from the environment (`MYSQL_*`,
 `MARIADB_*`, `POSTGRES_*`/`DATABASE_URL`, `LIBSQL_URL`/`LIBSQL_AUTH_TOKEN`),

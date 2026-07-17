@@ -14,3 +14,9 @@ __pycache__/
 
 # logs
 *.log
+
+# graphify knowledge graph (local only)
+graphify-out/
+
+# personal Claude Code + graphify config (never public)
+CLAUDE.local.md
