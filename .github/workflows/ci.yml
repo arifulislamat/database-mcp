@@ -52,7 +52,7 @@ jobs:
           --health-retries 20
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
       # Until the first package lands (M0.5) there is nothing to build;
@@ -127,7 +127,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       # Node runs the language-agnostic conformance suite.
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
       - uses: astral-sh/setup-uv@v6
