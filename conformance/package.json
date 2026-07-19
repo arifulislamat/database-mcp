@@ -6,7 +6,7 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
     "better-sqlite3": "^12.2.0",
-    "mysql2": "^3.22.6",
+    "mysql2": "^3.23.0",
     "pg": "^8.22.0"
   }
 }
