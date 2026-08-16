@@ -31,11 +31,11 @@
   ],
   "dependencies": {
     "@database-mcp/core": "^0.4.0",
-    "pg": "^8.22.0"
+    "pg": "^8.23.0"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
-    "@types/pg": "^8.15.0",
+    "@types/pg": "^8.21.0",
     "typescript": "^7.0.2"
   },
   "engines": {
