@@ -48,9 +48,9 @@ export class SqliteAdapter implements DatabaseAdapter {
     const deadline = Date.now() + timeoutMs;
     const rows: Record<string, unknown>[] = [];
     let truncated = false;
-    // ponytail: deadline is checked between rows — a single slow aggregate
-    // can't be interrupted (better-sqlite3 is sync, no interrupt API); move
-    // queries to a worker thread if that ever matters.
+    // Between-row deadline for in-process use. The server runs this adapter
+    // under IsolatedAdapter, which also stops a statement that never yields
+    // a row (better-sqlite3 has no interrupt API; issue #38).
     for (const row of stmt.iterate() as IterableIterator<Record<string, unknown>>) {
       if (Date.now() > deadline) {
         throw new Error(`timeout: query exceeded ${timeoutMs}ms`);

@@ -20,3 +20,4 @@ export {
 export { Secret, redact, registerSecret, sanitizeDsn, installLogRedaction } from "./secret.js";
 export { buildServer } from "./server.js";
 export { serve } from "./serve.js";
+export { IsolatedAdapter } from "./isolate.js";
