@@ -1,11 +1,11 @@
 # database-mcp
 
 [![CI](https://github.com/arifulislamat/database-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/arifulislamat/database-mcp/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/github/license/arifulislamat/database-mcp)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![npm](https://img.shields.io/npm/v/%40database-mcp%2Fcore?label=%40database-mcp%2Fcore)](https://www.npmjs.com/package/@database-mcp/core)
 [![PyPI](https://img.shields.io/pypi/v/database-mcp-core?label=database-mcp-core)](https://pypi.org/project/database-mcp-core/)
 [![crates.io](https://img.shields.io/crates/v/database-mcp-rs-core?label=database-mcp-rs-core)](https://crates.io/crates/database-mcp-rs-core)
-[![Node >= 20](https://img.shields.io/node/v/%40database-mcp%2Fcore)](https://nodejs.org)
+[![Node >= 22](https://img.shields.io/node/v/%40database-mcp%2Fcore)](https://nodejs.org)
 
 MCP servers that give AI clients safe, structured access to SQL databases.
 

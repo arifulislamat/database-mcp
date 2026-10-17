@@ -1,6 +1,6 @@
 # database-mcp-core
 
-[![PyPI](https://img.shields.io/pypi/v/database-mcp-core)](https://pypi.org/project/database-mcp-core/) [![CI](https://github.com/arifulislamat/database-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/arifulislamat/database-mcp/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/github/license/arifulislamat/database-mcp)](https://github.com/arifulislamat/database-mcp/blob/main/LICENSE)
+[![PyPI](https://img.shields.io/pypi/v/database-mcp-core)](https://pypi.org/project/database-mcp-core/) [![CI](https://github.com/arifulislamat/database-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/arifulislamat/database-mcp/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/arifulislamat/database-mcp/blob/main/LICENSE)
 
 Engine-agnostic core for the database-mcp Python servers: the MCP protocol
 layer, the adapter interface, multi-source config resolution, guardrails

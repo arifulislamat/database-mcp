@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   publish:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -25,10 +25,17 @@ jobs:
         run: |
           # <pkg>-ts-v<version>
           TAG="${GITHUB_REF_NAME}"
+          # The parts end up in shell commands; refuse anything but a plain tag.
+          [[ "$TAG" =~ ^[a-z]+-ts-v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$ ]] \
+            || { echo "unexpected tag name: $TAG"; exit 1; }
           echo "package=${TAG%-ts-v*}" >> "$GITHUB_OUTPUT"
           echo "version=${TAG##*-ts-v}" >> "$GITHUB_OUTPUT"
       - name: Install
         run: npm ci
+      - name: Version matches tag
+        run: |
+          test "$(node -p "require('./${{ steps.tag.outputs.package }}/typescript/package.json').version")" = "${{ steps.tag.outputs.version }}" \
+            || { echo "package.json version does not match the tag; run scripts/bump-version.mjs first"; exit 1; }
       - name: Build
         run: npm run build
       - name: Conformance (never publish unverified code)

@@ -1,6 +1,6 @@
 # database-mcp-libsql
 
-[![PyPI](https://img.shields.io/pypi/v/database-mcp-libsql)](https://pypi.org/project/database-mcp-libsql/) [![CI](https://github.com/arifulislamat/database-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/arifulislamat/database-mcp/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/github/license/arifulislamat/database-mcp)](https://github.com/arifulislamat/database-mcp/blob/main/LICENSE)
+[![PyPI](https://img.shields.io/pypi/v/database-mcp-libsql)](https://pypi.org/project/database-mcp-libsql/) [![CI](https://github.com/arifulislamat/database-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/arifulislamat/database-mcp/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/arifulislamat/database-mcp/blob/main/LICENSE)
 
 MCP server giving AI clients safe, structured access to a libSQL database:
 a local file or a remote libSQL/Turso server. Two tools, guardrails on by
