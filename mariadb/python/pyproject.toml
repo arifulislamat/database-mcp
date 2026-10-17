@@ -1,13 +1,13 @@
 [project]
 name = "database-mcp-mariadb"
-version = "0.2.0"
+version = "0.2.1"
 description = "MCP server for MariaDB with read-only guardrails, row caps, and statement timeouts"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.11"
 authors = [{ name = "Ariful Islam" }]
 keywords = ["mcp", "model-context-protocol", "mariadb", "mysql", "database", "sql"]
-dependencies = ["database-mcp-core>=0.2.0", "database-mcp-mysql>=0.2.0"]
+dependencies = ["database-mcp-core>=0.3.1", "database-mcp-mysql>=0.2.0"]
 
 [project.scripts]
 database-mcp-mariadb = "database_mcp_mariadb:main"

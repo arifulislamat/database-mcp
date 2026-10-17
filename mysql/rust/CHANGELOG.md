@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.2
+
+- Requires the core release with the SQL guard and redaction fixes
+  (database-mcp-rs-core 0.1.1).
+
 ## 0.1.1
 
 - First release built by the release workflow, with prebuilt binaries for

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.1
+
+- Requires the core release with the SQL guard and redaction fixes
+  (database-mcp-core 0.3.1).
+
 ## 0.2.0
 
 - A timed-out statement now fails with `timeout:`, is stopped at the server

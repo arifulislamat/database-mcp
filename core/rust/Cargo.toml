@@ -1,6 +1,6 @@
 [package]
 name = "database-mcp-rs-core"
-version = "0.1.0"
+version = "0.1.1"
 description = "Shared core for the database-mcp Rust servers: MCP tools, config, SQL guard, secret handling"
 readme = "README.md"
 keywords = ["mcp", "ai", "database", "sql"]

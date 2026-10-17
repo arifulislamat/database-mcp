@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.1
+
+- Security: read-only now holds on every query to a remote libSQL server.
+  Before, the session pragma did not survive across remote requests.
+- Writes that return rows (`INSERT ... RETURNING`) are committed. They were
+  rolled back on close.
+- Requires the core release with the SQL guard and redaction fixes
+  (database-mcp-core 0.3.1).
+
 ## 0.2.0
 
 - A runaway statement now stops at `queryTimeoutMs` instead of hanging the

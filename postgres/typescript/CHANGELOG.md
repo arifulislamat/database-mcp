@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.1
+
+- Security: in read-only mode every query runs in a read-only transaction
+  that is rolled back, so `SELECT set_config(...)` can no longer switch
+  read-only or the statement timeout off for later queries.
+- Requires the core release with the SQL guard and redaction fixes
+  (@database-mcp/core 0.5.1).
+
 ## 0.5.0
 
 - `date`, `timestamp` and `timestamptz` are returned as stored, no longer

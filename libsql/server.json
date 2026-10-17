@@ -6,12 +6,12 @@
     "url": "https://github.com/arifulislamat/database-mcp",
     "source": "github"
   },
-  "version": "0.5.0",
+  "version": "0.5.1",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "@database-mcp/libsql",
-      "version": "0.5.0",
+      "version": "0.5.1",
       "transport": {
         "type": "stdio"
       },
@@ -35,7 +35,7 @@
     {
       "registryType": "pypi",
       "identifier": "database-mcp-libsql",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "runtimeHint": "uvx",
       "transport": {
         "type": "stdio"
@@ -60,7 +60,7 @@
     {
       "registryType": "cargo",
       "identifier": "database-mcp-rs-libsql",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "transport": {
         "type": "stdio"
       },

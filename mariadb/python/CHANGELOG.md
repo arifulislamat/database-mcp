@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.1
+
+- Requires the core release with the SQL guard and redaction fixes
+  (database-mcp-core 0.3.1).
+
 ## 0.2.0
 
 - Picks up database-mcp-mysql 0.2: timeouts recover the connection (#38) and

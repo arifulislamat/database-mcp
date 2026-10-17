@@ -1,6 +1,6 @@
 [package]
 name = "database-mcp-rs-mariadb"
-version = "0.1.1"
+version = "0.1.2"
 description = "MCP server for MariaDB with read-only guardrails, row caps, and statement timeouts"
 readme = "README.md"
 keywords = ["mcp", "ai", "mariadb", "database", "sql"]
@@ -18,5 +18,5 @@ name = "database-mcp-mariadb"
 path = "src/main.rs"
 
 [dependencies]
-database-mcp-rs-core = { version = "0.1.0", path = "../../core/rust" }
-database-mcp-rs-mysql = { version = "0.1.1", path = "../../mysql/rust" }
+database-mcp-rs-core = { version = "0.1.1", path = "../../core/rust" }
+database-mcp-rs-mysql = { version = "0.1.2", path = "../../mysql/rust" }

@@ -1,13 +1,13 @@
 [project]
 name = "database-mcp-mysql"
-version = "0.2.0"
+version = "0.2.1"
 description = "MCP server for MySQL with read-only guardrails, row caps, and statement timeouts"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.11"
 authors = [{ name = "Ariful Islam" }]
 keywords = ["mcp", "model-context-protocol", "mysql", "database", "sql"]
-dependencies = ["database-mcp-core>=0.2.0", "pymysql>=1.1"]
+dependencies = ["database-mcp-core>=0.3.1", "pymysql>=1.1"]
 
 [project.scripts]
 database-mcp-mysql = "database_mcp_mysql:main"
