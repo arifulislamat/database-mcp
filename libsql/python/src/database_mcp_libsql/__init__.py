@@ -3,7 +3,7 @@ import os
 import sys
 from importlib.metadata import version as pkg_version
 
-from database_mcp_core import load_config, serve
+from database_mcp_core import IsolatedAdapter, load_config, serve
 
 from .adapter import LibsqlAdapter
 
@@ -23,13 +23,15 @@ def main() -> None:
             raise RuntimeError(
                 "config: no database given, pass --dsn <file-or-libsql-url>, set LIBSQL_URL, or use --config"
             )
-        asyncio.run(
-            serve(
-                LibsqlAdapter(config.connection.dsn, config.connection.password),
-                config,
-                pkg_version("database-mcp-libsql"),
-            )
+        # The libsql driver cannot interrupt a running statement, local or
+        # remote; a child process is the only way to stop a runaway one at
+        # queryTimeoutMs (issue #38). The token reaches the child over its
+        # stdin pipe, never argv or the environment.
+        token = config.connection.password.reveal() if config.connection.password else None
+        adapter = IsolatedAdapter(
+            "libsql", "database_mcp_libsql.adapter", "LibsqlAdapter", [config.connection.dsn, token]
         )
+        asyncio.run(serve(adapter, config, pkg_version("database-mcp-libsql")))
     except KeyboardInterrupt:
         pass
     except Exception as e:

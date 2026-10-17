@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { loadConfig, serve } from "@database-mcp/core";
+import { IsolatedAdapter, loadConfig, serve } from "@database-mcp/core";
 import { createRequire } from "node:module";
 import { LibsqlAdapter } from "./adapter.js";
 
@@ -16,7 +16,15 @@ try {
       "config: no database given — pass --dsn <file-or-libsql-url>, set LIBSQL_URL, or use --config",
     );
   }
-  await serve(new LibsqlAdapter(config.connection.dsn, config.connection.password), config, version);
+  const dsn = config.connection.dsn;
+  // Local files run synchronously in the driver; a child process is the only
+  // way to stop a runaway statement at queryTimeoutMs (issue #38). Remote
+  // servers are plain async HTTP and stay in-process with their token.
+  const remote = /^(libsql|https?|wss?):/i.test(dsn);
+  const adapter = remote
+    ? new LibsqlAdapter(dsn, config.connection.password)
+    : new IsolatedAdapter("libsql", new URL("./adapter.js", import.meta.url).href, "LibsqlAdapter", [dsn]);
+  await serve(adapter, config, version);
 } catch (e) {
   console.error(e instanceof Error ? e.message : String(e));
   process.exit(1);

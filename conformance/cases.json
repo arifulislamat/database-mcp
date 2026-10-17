@@ -62,5 +62,22 @@
     "tool": "execute_sql",
     "args": { "sql": "SELECT 1; SELECT 2" },
     "expect": { "isError": true, "textPrefix": "multi-statement:" }
+  },
+  {
+    "name": "runaway statement stops at the timeout",
+    "tool": "execute_sql",
+    "args": { "sql": "WITH RECURSIVE c(x) AS (SELECT 1 UNION ALL SELECT x + 1 FROM c) SELECT count(*) AS n FROM c" },
+    "argsOverrides": {
+      "mysql": { "sql": "SELECT SLEEP(30) AS s" },
+      "mariadb": { "sql": "SELECT SLEEP(30) AS s" }
+    },
+    "expect": { "isError": true, "textPrefix": "timeout:" },
+    "note": "A statement that never yields a row must still stop at queryTimeoutMs (issue #38). MySQL and MariaDB cap recursive CTEs at 1000 iterations, so they sleep instead."
+  },
+  {
+    "name": "server still answers after a timeout",
+    "tool": "execute_sql",
+    "args": { "sql": "SELECT 1 AS ok" },
+    "expect": { "isError": false, "summaryLine": "1 rows" }
   }
 ]

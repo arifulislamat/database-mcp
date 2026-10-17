@@ -1,4 +1,5 @@
 from .adapter import DatabaseAdapter
+from .isolated import IsolatedAdapter
 from .config import Config, Connection, Guardrails, Transport, load_config
 from .secret import Secret, install_log_redaction, redact, register_secret, sanitize_dsn
 from .serve import serve
@@ -10,6 +11,7 @@ __all__ = [
     "Connection",
     "DatabaseAdapter",
     "Guardrails",
+    "IsolatedAdapter",
     "Secret",
     "Transport",
     "build_server",

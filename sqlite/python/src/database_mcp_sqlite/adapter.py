@@ -40,25 +40,30 @@ class SqliteAdapter:
 
     def query(self, sql: str, *, max_rows: int, timeout_ms: int) -> dict[str, Any]:
         assert self._db is not None
-        cur = self._db.execute(sql)
-        if cur.description is None:
-            self._db.commit()
-            return {"columns": [], "rows": [], "rowCount": max(cur.rowcount, 0), "truncated": False}
-        columns = [d[0] for d in cur.description]
+        # The progress handler interrupts a running statement once the
+        # deadline passes, including one that never yields a row (issue #38).
         deadline = time.monotonic() + timeout_ms / 1000
-        rows: list[dict[str, Any]] = []
-        truncated = False
-        # ponytail: deadline is checked between rows; a single slow aggregate
-        # can't be interrupted this way. set_progress_handler is the upgrade
-        # path if that ever matters.
-        for raw in cur:
-            if time.monotonic() > deadline:
-                raise RuntimeError(f"timeout: query exceeded {timeout_ms}ms")
-            if len(rows) >= max_rows:
-                truncated = True
-                break
-            rows.append({c: _json_safe(v) for c, v in zip(columns, raw)})
-        return {"columns": columns, "rows": rows, "rowCount": len(rows), "truncated": truncated}
+        self._db.set_progress_handler(lambda: time.monotonic() > deadline, 1000)
+        try:
+            cur = self._db.execute(sql)
+            if cur.description is None:
+                self._db.commit()
+                return {"columns": [], "rows": [], "rowCount": max(cur.rowcount, 0), "truncated": False}
+            columns = [d[0] for d in cur.description]
+            rows: list[dict[str, Any]] = []
+            truncated = False
+            for raw in cur:
+                if len(rows) >= max_rows:
+                    truncated = True
+                    break
+                rows.append({c: _json_safe(v) for c, v in zip(columns, raw)})
+            return {"columns": columns, "rows": rows, "rowCount": len(rows), "truncated": truncated}
+        except sqlite3.OperationalError as e:
+            if str(e) == "interrupted":
+                raise RuntimeError(f"timeout: query exceeded {timeout_ms}ms") from None
+            raise
+        finally:
+            self._db.set_progress_handler(None, 0)
 
     def list_tables(self) -> list[dict[str, Any]]:
         assert self._db is not None

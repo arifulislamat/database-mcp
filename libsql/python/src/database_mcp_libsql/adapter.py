@@ -5,7 +5,6 @@ adapter's. What differs is the transport: the driver speaks to local files
 and remote servers (libsql:/https:/ws:) with an auth token.
 """
 
-import concurrent.futures
 import sys
 from typing import Any
 
@@ -31,11 +30,13 @@ def _dict_rows(cur) -> list[dict[str, Any]]:
 class LibsqlAdapter:
     engine = "libsql"
 
-    def __init__(self, url: str, auth_token: Secret | None = None) -> None:
+    def __init__(self, url: str, auth_token: Secret | str | None = None) -> None:
         self._url = url
-        self._token = auth_token
+        # A plain string arrives when running isolated (it crossed a process
+        # boundary); it becomes a Secret, and is registered for redaction,
+        # here too.
+        self._token = Secret(auth_token) if isinstance(auth_token, str) else auth_token
         self._db = None
-        self._pool: concurrent.futures.ThreadPoolExecutor | None = None
 
     def connect(self, *, read_only: bool) -> None:
         # The driver takes a plain path for local files; strip the file:
@@ -55,23 +56,16 @@ class LibsqlAdapter:
                 )
         # Fail fast on bad URL/credentials.
         self._db.execute("SELECT 1")
-        self._pool = concurrent.futures.ThreadPoolExecutor(max_workers=1)
 
     def close(self) -> None:
-        if self._pool is not None:
-            self._pool.shutdown(wait=False)
         if self._db is not None:
             self._db.close()
 
     def query(self, sql: str, *, max_rows: int, timeout_ms: int) -> dict[str, Any]:
-        assert self._db is not None and self._pool is not None
-        # ponytail: on timeout the call is abandoned, not cancelled (the
-        # worker thread keeps running), same semantics as the TS adapter's
-        # Promise.race.
-        try:
-            cur = self._pool.submit(self._db.execute, sql).result(timeout=timeout_ms / 1000)
-        except TimeoutError:
-            raise RuntimeError(f"timeout: query exceeded {timeout_ms}ms") from None
+        assert self._db is not None
+        # queryTimeoutMs is enforced by running this adapter under
+        # IsolatedAdapter: the driver itself cannot be interrupted.
+        cur = self._db.execute(sql)
         # Writes come back with an empty description (not None like stdlib sqlite3).
         if not cur.description:
             self._db.commit()

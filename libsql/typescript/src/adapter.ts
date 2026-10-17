@@ -61,8 +61,10 @@ export class LibsqlAdapter implements DatabaseAdapter {
   }
 
   async query(sql: string, { maxRows, timeoutMs }: QueryOptions): Promise<QueryResult> {
-    // ponytail: deadline via Promise.race — the HTTP request itself is not
-    // cancelled, only abandoned; per-request AbortSignal if it ever matters.
+    // Remote: deadline via Promise.race; the HTTP request is abandoned, not
+    // cancelled (per-request AbortSignal if it ever matters). Local files run
+    // under IsolatedAdapter instead, since a synchronous statement blocks
+    // this timer (issue #38).
     const timeout = new Promise<never>((_, reject) =>
       setTimeout(() => reject(new Error(`timeout: query exceeded ${timeoutMs}ms`)), timeoutMs).unref(),
     );

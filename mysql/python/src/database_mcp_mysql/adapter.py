@@ -65,11 +65,11 @@ class MysqlAdapter:
             autocommit=True,
             read_timeout=max(1, round(self._timeout_ms / 1000)),
             cursorclass=pymysql.cursors.DictCursor,
-        )
-        if read_only:
             # Layer two: the session rejects writes at the server, catching
             # what the SQL guard can't see (CTE-smuggled writes etc.).
-            self._db.query("SET SESSION TRANSACTION READ ONLY")
+            # init_command, not a one-off query: it re-runs on reconnect.
+            init_command="SET SESSION TRANSACTION READ ONLY" if read_only else None,
+        )
 
     def close(self) -> None:
         if self._db is not None:
@@ -81,7 +81,29 @@ class MysqlAdapter:
             cur.execute(sql, args or None)
             return cur.fetchall()
 
+    def _timed_out(self, thread_id: int) -> RuntimeError:
+        """After read_timeout the socket is gone but the statement may still
+        run at the server: reconnect, then KILL QUERY it (issue #38)."""
+        assert self._db is not None
+        try:
+            self._db.ping(reconnect=True)
+            self._db.query(f"KILL QUERY {int(thread_id)}")
+        except pymysql.MySQLError:
+            pass  # the next query's ping retries the reconnect
+        return RuntimeError(f"timeout: query exceeded {self._timeout_ms}ms")
+
     def query(self, sql: str, *, max_rows: int, timeout_ms: int) -> dict[str, Any]:
+        assert self._db is not None
+        self._db.ping(reconnect=True)  # recover a connection lost to a timeout
+        thread_id = self._db.thread_id()
+        try:
+            return self._query(sql, max_rows=max_rows)
+        except pymysql.err.OperationalError as e:
+            if e.args and e.args[0] == 2013 and "timed out" in str(e):
+                raise self._timed_out(thread_id) from None
+            raise
+
+    def _query(self, sql: str, *, max_rows: int) -> dict[str, Any]:
         assert self._db is not None
         with self._db.cursor() as cur:
             cur.execute(sql)
