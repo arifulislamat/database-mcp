@@ -12,8 +12,10 @@ exactly these two tools. Behavior is validated by the conformance suite in
   reaches the database. Error starts with `multi-statement:`.
 - In read-only mode (the default), mutating statements are rejected. Error
   starts with `read-only:`. Enforcement is two-layered: a conservative SQL
-  guard, plus a session-level read-only setting in the database itself, so a
-  write smuggled through a CTE fails too.
+  guard, plus read-only enforcement in the database itself (a read-only
+  session, and on Postgres a read-only transaction that is rolled back after
+  every query), so a write smuggled through a CTE fails too, and a read
+  cannot switch the setting off for later queries.
 - Results are capped at `maxRows` (default 1000). Truncation is stated.
 - Statements exceeding `queryTimeoutMs` (default 30000) are aborted. Error
   starts with `timeout:`.

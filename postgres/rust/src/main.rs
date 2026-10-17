@@ -131,6 +131,10 @@ fn message(e: tokio_postgres::Error) -> String {
 
 struct PostgresAdapter {
     client: Client,
+    read_only: bool,
+    /// Keeps concurrent sessions' queries out of each other's read-only
+    /// transaction on the shared client.
+    lock: tokio::sync::Mutex<()>,
 }
 
 impl PostgresAdapter {
@@ -255,7 +259,11 @@ impl Adapter for PostgresAdapter {
         // ponytail: one client; tokio-postgres pipelines concurrent calls on
         // it. A pool if long queries ever block other sessions.
         client.simple_query("SELECT 1").await.map_err(message)?; // fail fast
-        Ok(PostgresAdapter { client })
+        Ok(PostgresAdapter {
+            client,
+            read_only: config.guardrails.read_only,
+            lock: tokio::sync::Mutex::new(()),
+        })
     }
 
     async fn query(
@@ -277,7 +285,26 @@ impl Adapter for PostgresAdapter {
             .iter()
             .map(|c| c.type_().clone())
             .collect();
-        let messages = self.client.simple_query(sql).await.map_err(message)?;
+        let messages = if self.read_only {
+            // The session settings alone are not enough for layer two: a
+            // plain SELECT set_config('default_transaction_read_only', 'off',
+            // false) turns them off for every later query (statement_timeout
+            // too). Each query runs in a read-only transaction that is always
+            // rolled back, which also reverts any setting the query changed.
+            let _guard = self.lock.lock().await;
+            self.client
+                .batch_execute("BEGIN READ ONLY")
+                .await
+                .map_err(message)?;
+            let result = self.client.simple_query(sql).await;
+            self.client
+                .batch_execute("ROLLBACK")
+                .await
+                .map_err(message)?;
+            result.map_err(message)?
+        } else {
+            self.client.simple_query(sql).await.map_err(message)?
+        };
         let mut columns: Vec<String> = Vec::new();
         let mut rows = Vec::new();
         let mut truncated = false;

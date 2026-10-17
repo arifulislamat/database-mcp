@@ -35,9 +35,11 @@ class PostgresAdapter:
         self._connection = connection
         self._timeout_ms = query_timeout_ms
         self._db: psycopg.Connection | None = None
+        self._read_only = True
 
     def connect(self, *, read_only: bool) -> None:
         c = self._connection
+        self._read_only = read_only
         # Server-side per-statement timeout is the timeout guardrail. Layer
         # two: a startup parameter makes the session read-only at the server,
         # catching what the SQL guard can't see (CTE-smuggled writes).
@@ -72,6 +74,21 @@ class PostgresAdapter:
         return self._db.execute(sql, args or None).fetchall()
 
     def query(self, sql: str, *, max_rows: int, timeout_ms: int) -> dict[str, Any]:
+        assert self._db is not None
+        if not self._read_only:
+            return self._query(sql, max_rows)
+        # The session settings alone are not enough for layer two: a plain
+        # SELECT set_config('default_transaction_read_only', 'off', false)
+        # turns them off for every later query (statement_timeout too). Each
+        # query runs in a read-only transaction that is always rolled back,
+        # which also reverts any setting the query changed.
+        self._db.execute("BEGIN READ ONLY")
+        try:
+            return self._query(sql, max_rows)
+        finally:
+            self._db.execute("ROLLBACK")
+
+    def _query(self, sql: str, max_rows: int) -> dict[str, Any]:
         assert self._db is not None
         cur = self._db.execute(sql)
         if cur.description is None:
