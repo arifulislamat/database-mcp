@@ -27,6 +27,17 @@ function sanitizeError(e: unknown): string {
   return redact(message);
 }
 
+/**
+ * Binary values (BLOB, BYTEA, BINARY) are returned as lowercase hex in every
+ * language (issue #39). Buffer is a Uint8Array; libsql returns ArrayBuffer;
+ * an isolated adapter's Buffer arrives over IPC as a plain Uint8Array.
+ */
+function jsonValue(value: unknown): unknown {
+  if (value instanceof Uint8Array) return Buffer.from(value.buffer, value.byteOffset, value.byteLength).toString("hex");
+  if (value instanceof ArrayBuffer) return Buffer.from(value).toString("hex");
+  return value;
+}
+
 export function makeExecuteSql(adapter: DatabaseAdapter, guardrails: Guardrails) {
   return async ({ sql }: { sql: string }): Promise<ToolResult> => {
     const blocked = guardSql(sql, guardrails.readOnly);
@@ -42,7 +53,8 @@ export function makeExecuteSql(adapter: DatabaseAdapter, guardrails: Guardrails)
           : r.truncated
             ? `truncated to ${r.rowCount} rows`
             : `${r.rowCount} rows`;
-      const payload = JSON.stringify({ columns: r.columns, rows: r.rows });
+      const rows = r.rows.map((row) => Object.fromEntries(Object.entries(row).map(([k, v]) => [k, jsonValue(v)])));
+      const payload = JSON.stringify({ columns: r.columns, rows });
       return { content: [{ type: "text", text: `${summary}\n${payload}` }] };
     } catch (e) {
       return err(sanitizeError(e));

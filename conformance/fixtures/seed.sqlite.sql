@@ -23,3 +23,10 @@ INSERT INTO orders (id, user_id, amount) VALUES
   (1, 1, 19.99),
   (2, 1, 5.00),
   (3, 3, 42.50);
+
+CREATE TABLE files (
+  id INTEGER PRIMARY KEY,
+  data BLOB
+);
+
+INSERT INTO files (id, data) VALUES (1, x'00ff10');

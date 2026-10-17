@@ -27,7 +27,9 @@ exactly these two tools. Behavior is validated by the conformance suite in
 
 The summary line is `N rows`, `truncated to N rows`, or `OK (N affected)`.
 `rows` is an array of objects keyed by column name. Numbers that can overflow
-JSON (BIGINT, DECIMAL) are returned as strings.
+JSON (BIGINT, DECIMAL) are returned as strings. Binary values (BLOB, BYTEA,
+BINARY, VARBINARY, BIT) are returned as lowercase hex strings, so `x'00ff'`
+is `"00ff"`.
 
 **Errors:** `isError: true`; the content text is the message with its stable
 prefix (`read-only:`, `timeout:`, `multi-statement:`).

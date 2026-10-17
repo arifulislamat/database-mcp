@@ -26,3 +26,10 @@ INSERT INTO orders (id, user_id, amount) VALUES
 
 ANALYZE users;
 ANALYZE orders;
+
+CREATE TABLE files (
+  id INT PRIMARY KEY,
+  data BYTEA
+);
+
+INSERT INTO files (id, data) VALUES (1, '\x00ff10');
