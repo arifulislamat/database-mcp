@@ -181,3 +181,7 @@ jobs:
         run: node conformance/run.mjs -- target/debug/database-mcp-sqlite
       - name: Conformance (sqlite, http)
         run: node conformance/run.mjs --transport http -- target/debug/database-mcp-sqlite
+      - name: Conformance (libsql)
+        run: node conformance/run.mjs -- target/debug/database-mcp-libsql
+      - name: Secret leak check (libsql)
+        run: node conformance/leak-libsql.mjs -- target/debug/database-mcp-libsql
