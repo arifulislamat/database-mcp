@@ -4,6 +4,7 @@ import json
 import re
 from typing import Any
 
+import jsonschema
 import mcp.types as types
 from mcp.server.lowlevel import Server
 
@@ -34,56 +35,72 @@ def _sanitize_error(e: Exception) -> str:
 
 
 class _ToolError(Exception):
-    """Raised with the exact tool error text; the SDK returns str(e) with isError."""
+    """Raised with the exact tool error text; call_tool returns str(e) with isError."""
+
+
+def _error(text: str) -> types.CallToolResult:
+    return types.CallToolResult(content=[types.TextContent(type="text", text=text)], is_error=True)
 
 
 def build_server(adapter: DatabaseAdapter, guardrails: Guardrails, version: str) -> Server:
-    server: Server = Server(f"database-mcp-{adapter.engine}", version=version)
-
-    @server.list_tools()
-    async def list_tools() -> list[types.Tool]:
-        return [
-            types.Tool(
-                name="execute_sql",
-                description=(
-                    f"Run a single SQL statement against the {adapter.engine} database. "
-                    "Returns a summary line followed by compact JSON {columns, rows}. "
-                    + ("The connection is read-only. " if guardrails.read_only else "")
-                    + f"Results are capped at {guardrails.max_rows} rows."
-                ),
-                inputSchema={
-                    "type": "object",
-                    "properties": {"sql": {"type": "string", "description": "A single SQL statement"}},
-                    "required": ["sql"],
-                },
+    tools = [
+        types.Tool(
+            name="execute_sql",
+            description=(
+                f"Run a single SQL statement against the {adapter.engine} database. "
+                "Returns a summary line followed by compact JSON {columns, rows}. "
+                + ("The connection is read-only. " if guardrails.read_only else "")
+                + f"Results are capped at {guardrails.max_rows} rows."
             ),
-            types.Tool(
-                name="search_objects",
-                description=(
-                    "Explore the schema progressively. Without arguments: list all tables with "
-                    "estimated row counts. With a table name: full detail, columns, indexes, "
-                    "and foreign keys."
-                ),
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "table": {"type": "string", "description": "Table name for detail; omit to list tables"}
-                    },
-                },
+            input_schema={
+                "type": "object",
+                "properties": {"sql": {"type": "string", "description": "A single SQL statement"}},
+                "required": ["sql"],
+            },
+        ),
+        types.Tool(
+            name="search_objects",
+            description=(
+                "Explore the schema progressively. Without arguments: list all tables with "
+                "estimated row counts. With a table name: full detail, columns, indexes, "
+                "and foreign keys."
             ),
-        ]
+            input_schema={
+                "type": "object",
+                "properties": {
+                    "table": {"type": "string", "description": "Table name for detail; omit to list tables"}
+                },
+            },
+        ),
+    ]
+    schemas = {t.name: t.input_schema for t in tools}
 
-    @server.call_tool()
-    async def call_tool(name: str, arguments: dict[str, Any]) -> list[types.TextContent]:
-        if name == "execute_sql":
-            text = _execute_sql(adapter, guardrails, arguments["sql"])
-        elif name == "search_objects":
-            text = _search_objects(adapter, arguments.get("table"))
-        else:
-            raise _ToolError(f"unknown tool: {name}")
-        return [types.TextContent(type="text", text=text)]
+    async def list_tools(ctx: Any, params: Any) -> types.ListToolsResult:
+        return types.ListToolsResult(tools=tools)
 
-    return server
+    async def call_tool(ctx: Any, params: types.CallToolRequestParams) -> types.CallToolResult:
+        # SDK 2.x hands the raw request to this handler; input validation and
+        # exception-to-isError mapping (the 1.x decorator's job) happen here.
+        name, arguments = params.name, params.arguments or {}
+        try:
+            if name in schemas:
+                try:
+                    jsonschema.validate(instance=arguments, schema=schemas[name])
+                except jsonschema.ValidationError as e:
+                    return _error(f"Input validation error: {e.message}")
+            if name == "execute_sql":
+                text = _execute_sql(adapter, guardrails, arguments["sql"])
+            elif name == "search_objects":
+                text = _search_objects(adapter, arguments.get("table"))
+            else:
+                raise _ToolError(f"unknown tool: {name}")
+        except Exception as e:
+            return _error(str(e))
+        return types.CallToolResult(content=[types.TextContent(type="text", text=text)])
+
+    return Server(
+        f"database-mcp-{adapter.engine}", version=version, on_list_tools=list_tools, on_call_tool=call_tool
+    )
 
 
 def _json_default(value: Any) -> Any:

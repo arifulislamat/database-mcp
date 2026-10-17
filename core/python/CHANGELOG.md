@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.0
+
+- Move to MCP Python SDK 2.x (`mcp>=2.0,<3`), lifting the 0.2.1 cap. The
+  protocol layer now registers its handlers through the 2.x `Server`
+  constructor; tool names, descriptions, input schemas, error texts and
+  the HTTP Host/Origin guard are unchanged. Engines pick this up on their
+  next install.
+
 ## 0.2.1
 
 - Cap the MCP Python SDK below 2.0 (`mcp>=1.9,<2`). SDK 2.0 removed the
