@@ -8,9 +8,12 @@ use regex::Regex;
 /// Registered secret literals, masked by `redact()` just before output.
 static SECRETS: Mutex<Vec<String>> = Mutex::new(Vec::new());
 
-/// Matches the password in credential-bearing URIs: proto://user:pass@
+/// Matches the password in credential-bearing URIs: proto://user:pass@ (user may be empty)
 static URI_CREDENTIALS: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"(?i)([a-z][a-z0-9+.-]*://[^:@/\s]+):[^@/\s]+@").unwrap());
+    LazyLock::new(|| Regex::new(r"(?i)([a-z][a-z0-9+.-]*://[^:@/\s]*):[^@/\s]+@").unwrap());
+/// Matches the password in key=value DSNs: host=db password='p w'
+static KV_PASSWORD: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"(?i)\b(password\s*=\s*)('(?:[^'\\]|\\.)*'|[^\s']+)").unwrap());
 
 pub fn register_secret(value: &str) {
     if !value.is_empty() {
@@ -25,7 +28,8 @@ pub fn register_secret(value: &str) {
 ///
 /// Belt and suspenders for driver messages we don't control.
 pub fn redact(text: &str) -> String {
-    let mut out = URI_CREDENTIALS.replace_all(text, "$1:***@").into_owned();
+    let out = URI_CREDENTIALS.replace_all(text, "$1:***@");
+    let mut out = KV_PASSWORD.replace_all(&out, "${1}***").into_owned();
     for s in SECRETS.lock().unwrap_or_else(|e| e.into_inner()).iter() {
         out = out.replace(s.as_str(), "***");
     }
@@ -34,7 +38,8 @@ pub fn redact(text: &str) -> String {
 
 /// A full DSN embeds the password; log this form instead.
 pub fn sanitize_dsn(dsn: &str) -> String {
-    URI_CREDENTIALS.replace_all(dsn, "$1@").into_owned()
+    let out = URI_CREDENTIALS.replace_all(dsn, "$1@");
+    KV_PASSWORD.replace_all(&out, "${1}***").into_owned()
 }
 
 /// Logs to stderr through the redaction filter. stdout is the MCP stream and

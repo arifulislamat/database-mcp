@@ -7,22 +7,24 @@ export function registerSecret(value: string): void {
   if (value) secrets.add(value);
 }
 
-/** Matches the password in credential-bearing URIs: proto://user:pass@ */
-const URI_CREDENTIALS = /([a-z][a-z0-9+.-]*:\/\/[^:@/\s]+):[^@/\s]+@/gi;
+/** Matches the password in credential-bearing URIs: proto://user:pass@ (user may be empty) */
+const URI_CREDENTIALS = /([a-z][a-z0-9+.-]*:\/\/[^:@/\s]*):[^@/\s]+@/gi;
+/** Matches the password in key=value DSNs: host=db password='p w' */
+const KV_PASSWORD = /\b(password\s*=\s*)('(?:[^'\\]|\\.)*'|[^\s']+)/gi;
 
 /**
  * Masks every registered secret and anything shaped like URI credentials.
  * Belt and suspenders for logs from dependencies we don't control.
  */
 export function redact(text: string): string {
-  let out = text.replace(URI_CREDENTIALS, "$1:***@");
+  let out = text.replace(URI_CREDENTIALS, "$1:***@").replace(KV_PASSWORD, "$1***");
   for (const s of secrets) out = out.split(s).join("***");
   return out;
 }
 
 /** A full DSN embeds the password; log this form instead. */
 export function sanitizeDsn(dsn: string): string {
-  return dsn.replace(URI_CREDENTIALS, "$1@");
+  return dsn.replace(URI_CREDENTIALS, "$1@").replace(KV_PASSWORD, "$1***");
 }
 
 /**

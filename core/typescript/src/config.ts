@@ -101,13 +101,22 @@ export function loadConfig(argv: string[], env: NodeJS.ProcessEnv, opts: ConfigO
   if (dsn) {
     try {
       const parsed = new URL(dsn);
-      if (parsed.password) registerSecret(decodeURIComponent(parsed.password));
+      if (parsed.password) {
+        registerSecret(parsed.password);
+        registerSecret(decodeURIComponent(parsed.password));
+      }
     } catch {
       /* not a URL (e.g. a file path) */
     }
   }
 
   const num = (v: unknown): number | undefined => (v === undefined ? undefined : Number(v));
+  // NaN or 0 would silently switch a guardrail off (no row cap, "0 rows").
+  const positive = (name: string, v: unknown): number => {
+    const n = Number(v);
+    if (!Number.isSafeInteger(n) || n < 1) throw new Error(`config: ${name} must be a positive integer, got '${v}'`);
+    return n;
+  };
 
   const config: Config = {
     connection: {
@@ -126,8 +135,8 @@ export function loadConfig(argv: string[], env: NodeJS.ProcessEnv, opts: ConfigO
           : env.ALLOW_WRITE !== undefined
             ? env.ALLOW_WRITE !== "true"
             : true,
-      maxRows: Number(flag("--max-rows") ?? fg.maxRows ?? env.MAX_ROWS ?? 1000),
-      queryTimeoutMs: Number(flag("--query-timeout-ms") ?? fg.queryTimeoutMs ?? env.QUERY_TIMEOUT_MS ?? 30000),
+      maxRows: positive("maxRows", flag("--max-rows") ?? fg.maxRows ?? env.MAX_ROWS ?? 1000),
+      queryTimeoutMs: positive("queryTimeoutMs", flag("--query-timeout-ms") ?? fg.queryTimeoutMs ?? env.QUERY_TIMEOUT_MS ?? 30000),
     },
     transport: {
       type: (flag("--transport") ?? ft.type ?? "stdio") as "stdio" | "http",

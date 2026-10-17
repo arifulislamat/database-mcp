@@ -212,3 +212,30 @@ fn sql_guard_shared_dialect_cases() {
         }
     }
 }
+
+#[test]
+fn redact_empty_uri_user_and_key_value_dsn_passwords() {
+    assert_eq!(redact("postgres://:p%40ss@db/x"), "postgres://:***@db/x");
+    assert_eq!(
+        redact("host=db user=app password=hunter2 dbname=x"),
+        "host=db user=app password=*** dbname=x"
+    );
+    assert_eq!(
+        redact("host=db PASSWORD = 'a b' dbname=x"),
+        "host=db PASSWORD = *** dbname=x"
+    );
+}
+
+#[test]
+fn config_guardrail_numbers_must_be_positive_integers() {
+    for v in ["abc", "0", "-5", "1.5"] {
+        let err = load_config(&args(&["--max-rows", v]), &env(&[]), &names("X")).unwrap_err();
+        assert!(err.contains("maxRows must be a positive integer"), "{err}");
+        let err =
+            load_config(&args(&[]), &env(&[("QUERY_TIMEOUT_MS", v)]), &names("X")).unwrap_err();
+        assert!(
+            err.contains("queryTimeoutMs must be a positive integer"),
+            "{err}"
+        );
+    }
+}

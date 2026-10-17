@@ -126,6 +126,17 @@ fn number<T: std::str::FromStr>(name: &str, raw: Option<String>, default: T) -> 
     }
 }
 
+/// 0 or garbage would silently switch a guardrail off.
+fn positive(name: &str, raw: Option<String>, default: u64) -> Result<u64, String> {
+    match number(name, raw.clone(), default) {
+        Ok(n) if n > 0 => Ok(n),
+        _ => Err(format!(
+            "config: {name} must be a positive integer, got '{}'",
+            raw.unwrap_or_default()
+        )),
+    }
+}
+
 /// Multi-source resolution, highest precedence first:
 ///   1. flags (--dsn, --allow-write, --max-rows, --query-timeout-ms, --transport, --port)
 ///   2. --config <path.yaml> (or DB_MCP_CONFIG), with ${VAR} expansion
@@ -212,14 +223,14 @@ pub fn load_config(
         },
         guardrails: Guardrails {
             read_only,
-            max_rows: number(
+            max_rows: positive(
                 "maxRows",
                 flag("--max-rows")
                     .or_else(|| as_text(fg.get("maxRows")))
                     .or_else(|| var("MAX_ROWS")),
                 1000,
-            )?,
-            query_timeout_ms: number(
+            )? as usize,
+            query_timeout_ms: positive(
                 "queryTimeoutMs",
                 flag("--query-timeout-ms")
                     .or_else(|| as_text(fg.get("queryTimeoutMs")))

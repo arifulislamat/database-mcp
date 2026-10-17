@@ -12,8 +12,10 @@ def register_secret(value: str) -> None:
         _secrets.add(value)
 
 
-# Matches the password in credential-bearing URIs: proto://user:pass@
-_URI_CREDENTIALS = re.compile(r"([a-z][a-z0-9+.-]*://[^:@/\s]+):[^@/\s]+@", re.IGNORECASE)
+# Matches the password in credential-bearing URIs: proto://user:pass@ (user may be empty)
+_URI_CREDENTIALS = re.compile(r"([a-z][a-z0-9+.-]*://[^:@/\s]*):[^@/\s]+@", re.IGNORECASE)
+# Matches the password in key=value DSNs: host=db password='p w'
+_KV_PASSWORD = re.compile(r"\b(password\s*=\s*)('(?:[^'\\]|\\.)*'|[^\s']+)", re.IGNORECASE)
 
 
 def redact(text: str) -> str:
@@ -21,7 +23,7 @@ def redact(text: str) -> str:
 
     Belt and suspenders for logs from dependencies we don't control.
     """
-    out = _URI_CREDENTIALS.sub(r"\1:***@", text)
+    out = _KV_PASSWORD.sub(r"\1***", _URI_CREDENTIALS.sub(r"\1:***@", text))
     for s in _secrets:
         out = out.replace(s, "***")
     return out
@@ -29,7 +31,7 @@ def redact(text: str) -> str:
 
 def sanitize_dsn(dsn: str) -> str:
     """A full DSN embeds the password; log this form instead."""
-    return _URI_CREDENTIALS.sub(r"\1@", dsn)
+    return _KV_PASSWORD.sub(r"\1***", _URI_CREDENTIALS.sub(r"\1@", dsn))
 
 
 class Secret:
