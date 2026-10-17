@@ -190,3 +190,25 @@ fn sql_guard_read_only_and_multi_statement_classification() {
     assert_eq!(guard_sql("SELECT 'a;b' FROM t", true), None);
     assert_eq!(guard_sql("DELETE FROM t", false), None);
 }
+
+// Shared with the TS and Python tests: bypass attempts across SQL dialects.
+#[test]
+fn sql_guard_shared_dialect_cases() {
+    let path = concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../../conformance/fixtures/guard-cases.json"
+    );
+    let cases: Vec<(String, Option<String>)> =
+        serde_json::from_str(&std::fs::read_to_string(path).unwrap()).unwrap();
+    for (sql, prefix) in cases {
+        let got = guard_sql(&sql, true);
+        match prefix {
+            None => assert_eq!(got, None, "{sql:?}"),
+            Some(p) => assert!(
+                got.as_deref()
+                    .is_some_and(|g| g.starts_with(&format!("{p}:"))),
+                "{sql:?} -> {got:?}"
+            ),
+        }
+    }
+}

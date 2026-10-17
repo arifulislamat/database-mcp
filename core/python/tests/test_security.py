@@ -1,6 +1,7 @@
 """Mirrors core/typescript/test/security.test.mjs."""
 
 import json
+from pathlib import Path
 
 import pytest
 
@@ -99,3 +100,14 @@ def test_sql_guard_read_only_and_multi_statement_classification():
     assert guard_sql("SELECT 1; SELECT 2", True).startswith("multi-statement:")
     assert guard_sql("SELECT 'a;b' FROM t", True) is None
     assert guard_sql("DELETE FROM t", False) is None
+
+
+# Shared with the TS and Rust tests: bypass attempts across SQL dialects.
+def test_sql_guard_shared_dialect_cases():
+    cases_path = Path(__file__).parents[3] / "conformance" / "fixtures" / "guard-cases.json"
+    for sql, prefix in json.loads(cases_path.read_text()):
+        got = guard_sql(sql, True)
+        if prefix is None:
+            assert got is None, sql
+        else:
+            assert got and got.startswith(f"{prefix}:"), (sql, got)
