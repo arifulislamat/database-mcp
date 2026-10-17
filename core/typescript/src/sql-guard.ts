@@ -73,7 +73,7 @@ function scan(sql: string): { empty: boolean; multi: boolean } {
       if (ch === "'" || ch === '"' || ch === "`") quote = ch;
     }
   }
-  if (ambiguous) multi = sql.replace(/[\s;]+$/, "").includes(";");
+  if (ambiguous) multi = sql.replace(/[ \t\n\v\f;]+$/, "").includes(";");
   return { empty, multi };
 }
 
@@ -92,6 +92,10 @@ export function guardSql(sql: string, readOnly: boolean): string | null {
     const first = firstWord(normalized);
     if (!READ_PREFIXES.includes(first)) {
       return `read-only: statement '${first}' is blocked (start the server with --allow-write to enable writes)`;
+    }
+    // MySQL writes files on the server from a plain SELECT.
+    if (/\bINTO\s+(OUTFILE|DUMPFILE)\b/i.test(normalized)) {
+      return "read-only: SELECT ... INTO OUTFILE/DUMPFILE is blocked (start the server with --allow-write to enable writes)";
     }
   }
   return null;

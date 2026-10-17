@@ -1,5 +1,6 @@
 """PostgreSQL adapter over psycopg. Zero MCP types."""
 
+import contextlib
 import datetime
 from decimal import Decimal
 from typing import Any
@@ -84,9 +85,14 @@ class PostgresAdapter:
         # which also reverts any setting the query changed.
         self._db.execute("BEGIN READ ONLY")
         try:
-            return self._query(sql, max_rows)
-        finally:
-            self._db.execute("ROLLBACK")
+            result = self._query(sql, max_rows)
+        except Exception:
+            # Keep the query's error (a timeout, say) over a failed rollback.
+            with contextlib.suppress(Exception):
+                self._db.execute("ROLLBACK")
+            raise
+        self._db.execute("ROLLBACK")
+        return result
 
     def _query(self, sql: str, max_rows: int) -> dict[str, Any]:
         assert self._db is not None

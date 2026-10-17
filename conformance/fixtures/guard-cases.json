@@ -29,5 +29,9 @@
   ["DELETE FROM t; DELETE FROM u", "multi-statement"],
   ["/* x */ WITH a AS (SELECT 1) SELECT * FROM a", null],
   ["SELECT 1 /* unterminated ; DROP", null],
-  ["SELECT 'it''s; fine'", null]
+  ["SELECT 'it''s; fine'", null],
+  ["SELECT * FROM t INTO OUTFILE '/tmp/x'", "read-only"],
+  ["SELECT 1 into  dumpfile '/tmp/x'", "read-only"],
+  ["SELECT 1 INTO @v", null],
+  ["SELECT $1;\u00a0", "multi-statement"]
 ]

@@ -1,8 +1,14 @@
 //! Layer-one read-only guard: conservative string classification.
 
+use std::sync::LazyLock;
+
+use regex::Regex;
+
 const READ_PREFIXES: &[&str] = &[
     "SELECT", "WITH", "EXPLAIN", "VALUES", "SHOW", "DESCRIBE", "DESC",
 ];
+static INTO_FILE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"(?i)\bINTO\s+(OUTFILE|DUMPFILE)\b").unwrap());
 const WHITESPACE: &[char] = &[' ', '\t', '\n', '\x0b', '\x0c'];
 
 /// First keyword after leading whitespace and comments, or "" when the lead
@@ -110,7 +116,7 @@ fn scan(sql: &str) -> (bool, bool) {
     }
     if ambiguous {
         multi = sql
-            .trim_end_matches(|c: char| c.is_whitespace() || c == ';')
+            .trim_end_matches(|c: char| WHITESPACE.contains(&c) || c == ';')
             .contains(';');
     }
     (empty, multi)
@@ -136,6 +142,10 @@ pub fn guard_sql(sql: &str, read_only: bool) -> Option<String> {
             return Some(format!(
                 "read-only: statement '{first}' is blocked (start the server with --allow-write to enable writes)"
             ));
+        }
+        // MySQL writes files on the server from a plain SELECT.
+        if INTO_FILE.is_match(&normalized) {
+            return Some("read-only: SELECT ... INTO OUTFILE/DUMPFILE is blocked (start the server with --allow-write to enable writes)".into());
         }
     }
     None

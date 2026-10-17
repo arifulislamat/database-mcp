@@ -5,7 +5,8 @@ import re
 _READ_PREFIXES = {"SELECT", "WITH", "EXPLAIN", "VALUES", "SHOW", "DESCRIBE", "DESC"}
 _WHITESPACE = " \t\n\v\f"
 _FIRST_WORD = re.compile(r"[A-Za-z]+")
-_TRAILING = re.compile(r"[\s;]+$")
+_INTO_FILE = re.compile(r"\bINTO\s+(OUTFILE|DUMPFILE)\b", re.IGNORECASE)
+_TRAILING = re.compile(r"[ \t\n\v\f;]+$")
 
 
 def _first_word(sql: str) -> str:
@@ -108,4 +109,7 @@ def guard_sql(sql: str, read_only: bool) -> str | None:
         first = _first_word(normalized)
         if first not in _READ_PREFIXES:
             return f"read-only: statement '{first}' is blocked (start the server with --allow-write to enable writes)"
+        # MySQL writes files on the server from a plain SELECT.
+        if _INTO_FILE.search(normalized):
+            return "read-only: SELECT ... INTO OUTFILE/DUMPFILE is blocked (start the server with --allow-write to enable writes)"
     return None

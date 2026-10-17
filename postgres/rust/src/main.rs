@@ -276,6 +276,9 @@ impl Adapter for PostgresAdapter {
         // the server; its error maps to the timeout: prefix in core.
         // Prepare only parses and describes: it yields column types without
         // executing. The simple query then runs the statement once.
+        // Held from prepare to ROLLBACK: a failed prepare from another session
+        // would otherwise abort this session's open transaction.
+        let _guard = self.lock.lock().await;
         let types: Vec<Type> = self
             .client
             .prepare(sql)
@@ -291,9 +294,10 @@ impl Adapter for PostgresAdapter {
             // false) turns them off for every later query (statement_timeout
             // too). Each query runs in a read-only transaction that is always
             // rolled back, which also reverts any setting the query changed.
-            let _guard = self.lock.lock().await;
+            // The leading ROLLBACK closes a transaction left open by a
+            // cancelled call (outside one it is only a warning).
             self.client
-                .batch_execute("BEGIN READ ONLY")
+                .batch_execute("ROLLBACK; BEGIN READ ONLY")
                 .await
                 .map_err(message)?;
             let result = self.client.simple_query(sql).await;
