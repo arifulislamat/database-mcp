@@ -11,6 +11,26 @@ import type {
   Connection,
 } from "@database-mcp/core";
 
+// date, timestamp, timestamptz
+const DATE = 1082;
+const TIMESTAMP = 1114;
+const TIMESTAMPTZ = 1184;
+
+/**
+ * Dates stay the stored value. pg parses them into JS Dates, shifted through
+ * this process's timezone (issue #46). Keep the server's text with ISO 8601's
+ * T separator, and offsets as +hh:mm, matching the Python and Rust lines.
+ */
+const types = {
+  getTypeParser(oid: number, format?: "text" | "binary") {
+    if (oid === DATE) return (v: string) => v;
+    if (oid === TIMESTAMP || oid === TIMESTAMPTZ) {
+      return (v: string) => v.replace(" ", "T").replace(/([+-]\d\d)$/, "$1:00");
+    }
+    return pg.types.getTypeParser(oid, format);
+  },
+};
+
 export class PostgresAdapter implements DatabaseAdapter {
   engine = "postgres";
   private pool!: pg.Pool;
@@ -30,6 +50,7 @@ export class PostgresAdapter implements DatabaseAdapter {
       password: c.dsn ? undefined : c.password?.reveal(),
       database: c.dsn ? undefined : c.database,
       max: 4,
+      types,
       // Server-side per-statement timeout — the timeout guardrail.
       statement_timeout: this.queryTimeoutMs,
       // Layer two: a startup parameter makes every session read-only at the
