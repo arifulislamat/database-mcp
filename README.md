@@ -29,7 +29,8 @@ language. Every engine is also listed on the
 [MCP Registry](https://registry.modelcontextprotocol.io) with both install
 options.
 
-A Rust line is in progress (SQLite, libSQL, MySQL and MariaDB so far, crates named `database-mcp-rs-*`).
+A Rust line covers all five engines too (crates named `database-mcp-rs-*`,
+not yet published).
 Go is planned.
 
 ## Design principles
