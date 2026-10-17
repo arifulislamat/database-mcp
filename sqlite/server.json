@@ -42,6 +42,23 @@
           "isSecret": false
         }
       ]
+    },
+    {
+      "registryType": "cargo",
+      "identifier": "database-mcp-rs-sqlite",
+      "version": "0.1.1",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "SQLITE_PATH",
+          "description": "Path to the SQLite database file",
+          "isRequired": true,
+          "format": "string",
+          "isSecret": false
+        }
+      ]
     }
   ]
 }

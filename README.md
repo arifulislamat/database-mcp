@@ -27,8 +27,8 @@ default: read-only mode, row caps, and statement timeouts.
 All three lines are published and pass the same language-agnostic
 conformance suite against real databases in CI, so behavior is identical
 regardless of language. Every engine is also listed on the
-[MCP Registry](https://registry.modelcontextprotocol.io) with the npm and
-PyPI install options.
+[MCP Registry](https://registry.modelcontextprotocol.io) with all three
+install options: npm, PyPI, and cargo.
 
 Rust crates are named `database-mcp-rs-<engine>` because the plain names are
 taken on crates.io; the command each one installs is still

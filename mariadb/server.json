@@ -84,6 +84,44 @@
           "isSecret": false
         }
       ]
+    },
+    {
+      "registryType": "cargo",
+      "identifier": "database-mcp-rs-mariadb",
+      "version": "0.1.1",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "MARIADB_HOST",
+          "description": "Database host",
+          "isRequired": true,
+          "format": "string",
+          "isSecret": false
+        },
+        {
+          "name": "MARIADB_USER",
+          "description": "Database user (a read-only user is recommended)",
+          "isRequired": true,
+          "format": "string",
+          "isSecret": false
+        },
+        {
+          "name": "MARIADB_PASSWORD",
+          "description": "Database password (or use MARIADB_PASSWORD_FILE)",
+          "isRequired": false,
+          "format": "string",
+          "isSecret": true
+        },
+        {
+          "name": "MARIADB_DATABASE",
+          "description": "Database name",
+          "isRequired": true,
+          "format": "string",
+          "isSecret": false
+        }
+      ]
     }
   ]
 }
