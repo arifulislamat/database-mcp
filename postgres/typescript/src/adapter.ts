@@ -11,23 +11,48 @@ import type {
   Connection,
 } from "@database-mcp/core";
 
-// date, timestamp, timestamptz
+// Type OIDs from pg_type.
 const DATE = 1082;
 const TIMESTAMP = 1114;
 const TIMESTAMPTZ = 1184;
+const DATE_ARRAY = 1182;
+const TIMESTAMP_ARRAY = 1115;
+const TIMESTAMPTZ_ARRAY = 1185;
+const NUMERIC_ARRAY = 1231;
+
+const asStored = (v: string) => v;
+const isoTimestamp = (v: string) => v.replace(" ", "T").replace(/([+-]\d\d)$/, "$1:00");
+// @types/pg declares arrayParser as a function; at runtime (pg-types) it is
+// { create(source, transform) } returning a parser.
+const arrayParser = pg.types.arrayParser as unknown as {
+  create(source: string, transform: (entry: string) => unknown): { parse(): unknown[] };
+};
+const arrayOf = (element: (v: string) => unknown) => (v: string) => arrayParser.create(v, element).parse();
 
 /**
  * Dates stay the stored value. pg parses them into JS Dates, shifted through
  * this process's timezone (issue #46). Keep the server's text with ISO 8601's
  * T separator, and offsets as +hh:mm, matching the Python and Rust lines.
+ * The same holds inside arrays, where NUMERIC also stays a string like its
+ * scalar form (pg's default turns numeric[] into floats).
  */
 const types = {
   getTypeParser(oid: number, format?: "text" | "binary") {
-    if (oid === DATE) return (v: string) => v;
-    if (oid === TIMESTAMP || oid === TIMESTAMPTZ) {
-      return (v: string) => v.replace(" ", "T").replace(/([+-]\d\d)$/, "$1:00");
+    switch (oid) {
+      case DATE:
+        return asStored;
+      case TIMESTAMP:
+      case TIMESTAMPTZ:
+        return isoTimestamp;
+      case DATE_ARRAY:
+      case NUMERIC_ARRAY:
+        return arrayOf(asStored);
+      case TIMESTAMP_ARRAY:
+      case TIMESTAMPTZ_ARRAY:
+        return arrayOf(isoTimestamp);
+      default:
+        return pg.types.getTypeParser(oid, format);
     }
-    return pg.types.getTypeParser(oid, format);
   },
 };
 
