@@ -86,5 +86,15 @@
     "args": { "sql": "SELECT data FROM files WHERE id = 1" },
     "expect": { "isError": false, "summaryLine": "1 rows", "textContains": ["\"data\":\"00ff10\""] },
     "note": "BLOB, BYTEA and binary column values are lowercase hex strings in every language (issue #39)."
+  },
+  {
+    "name": "dates are returned as stored",
+    "tool": "execute_sql",
+    "args": { "sql": "SELECT day, at FROM events WHERE id = 1" },
+    "expect": { "isError": false, "textContains": ["\"day\":\"2024-01-02\"", "\"at\":\"2024-01-02T03:04:05\""] },
+    "overrides": {
+      "sqlite": { "isError": false, "textContains": ["\"day\":\"2024-01-02\"", "\"at\":\"2024-01-02 03:04:05\""] }
+    },
+    "note": "DATE and DATETIME/TIMESTAMP values are the stored value, never shifted through the server's timezone (issue #46); date-times use ISO 8601's T separator. SQLite stores dates as plain text, returned verbatim."
   }
 ]
