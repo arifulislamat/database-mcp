@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   parse:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       package: ${{ steps.tag.outputs.package }}
       version: ${{ steps.tag.outputs.version }}
@@ -23,18 +23,21 @@ jobs:
         run: |
           # <pkg>-rs-v<version>
           TAG="${GITHUB_REF_NAME}"
+          # The parts end up in shell commands; refuse anything but a plain tag.
+          [[ "$TAG" =~ ^[a-z]+-rs-v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$ ]] \
+            || { echo "unexpected tag name: $TAG"; exit 1; }
           echo "package=${TAG%-rs-v*}" >> "$GITHUB_OUTPUT"
           echo "version=${TAG##*-rs-v}" >> "$GITHUB_OUTPUT"
 
   publish:
     needs: parse
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     # One environment for all six crates: crates.io has no unique-tuple rule,
     # and a dedicated environment can require approval before any publish.
     environment: crates-io
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
       - uses: dtolnay/rust-toolchain@stable

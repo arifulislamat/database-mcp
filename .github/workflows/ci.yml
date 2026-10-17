@@ -5,9 +5,12 @@ on:
     branches: [main]
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   typescript:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     services:
       mysql:
         image: mysql:8.4
@@ -52,7 +55,7 @@ jobs:
           --health-retries 20
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
       # Until the first package lands (M0.5) there is nothing to build;
@@ -81,7 +84,7 @@ jobs:
           if [ -f conformance/leak-libsql.mjs ]; then npm run leak-check; fi
 
   python:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     services:
       mysql:
         image: mysql:8.4
@@ -127,10 +130,10 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       # Node runs the language-agnostic conformance suite.
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
-      - uses: astral-sh/setup-uv@v7
+      - uses: astral-sh/setup-uv@v10.3.0
       - name: Install
         run: |
           npm ci
@@ -164,7 +167,7 @@ jobs:
           node conformance/run.mjs -- uv run database-mcp-sqlite
 
   rust:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     services:
       mysql:
         image: mysql:8.4
@@ -210,7 +213,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       # Node runs the language-agnostic conformance suite.
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
       - uses: dtolnay/rust-toolchain@stable
