@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.1
+
+- Requires the core release with the SQL guard and redaction fixes
+  (@database-mcp/core 0.5.1).
+
 ## 0.5.0
 
 - DATE and DATETIME/TIMESTAMP are returned as stored, no longer shifted

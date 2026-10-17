@@ -1,6 +1,6 @@
 [package]
 name = "database-mcp-rs-postgres"
-version = "0.2.0"
+version = "0.2.1"
 description = "MCP server for PostgreSQL with read-only guardrails, row caps, and statement timeouts"
 readme = "README.md"
 keywords = ["mcp", "ai", "postgres", "postgresql", "database"]
@@ -18,7 +18,7 @@ name = "database-mcp-postgres"
 path = "src/main.rs"
 
 [dependencies]
-database-mcp-rs-core = { version = "0.1.0", path = "../../core/rust" }
+database-mcp-rs-core = { version = "0.1.1", path = "../../core/rust" }
 # TLS via rustls with the ring provider and the Mozilla root store: no
 # system OpenSSL needed, hosted Postgres (sslmode=require) works.
 rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12"] }

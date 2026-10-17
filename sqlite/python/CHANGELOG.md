@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.1
+
+- Writes that return rows (`INSERT ... RETURNING`) are committed. They were
+  rolled back on close.
+- Requires the core release with the SQL guard and redaction fixes
+  (database-mcp-core 0.3.1).
+
 ## 0.2.0
 
 - A statement that never yields a row now stops at `queryTimeoutMs`

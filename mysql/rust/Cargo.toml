@@ -1,6 +1,6 @@
 [package]
 name = "database-mcp-rs-mysql"
-version = "0.1.1"
+version = "0.1.2"
 description = "MCP server for MySQL with read-only guardrails, row caps, and statement timeouts"
 readme = "README.md"
 keywords = ["mcp", "ai", "mysql", "database", "sql"]
@@ -18,7 +18,7 @@ name = "database-mcp-mysql"
 path = "src/main.rs"
 
 [dependencies]
-database-mcp-rs-core = { version = "0.1.0", path = "../../core/rust" }
+database-mcp-rs-core = { version = "0.1.1", path = "../../core/rust" }
 # No TLS, matching the TS and Python lines; pure-Rust compression backend.
 mysql_async = { version = "0.37.1", default-features = false, features = ["minimal-rust"] }
 serde_json = { version = "1.0", features = ["preserve_order"] }

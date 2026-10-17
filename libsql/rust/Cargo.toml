@@ -1,6 +1,6 @@
 [package]
 name = "database-mcp-rs-libsql"
-version = "0.1.1"
+version = "0.1.2"
 description = "MCP server for libSQL/Turso (local files and remote databases) with read-only guardrails, row caps, and statement timeouts"
 readme = "README.md"
 keywords = ["mcp", "ai", "libsql", "turso", "sqlite"]
@@ -18,7 +18,7 @@ name = "database-mcp-libsql"
 path = "src/main.rs"
 
 [dependencies]
-database-mcp-rs-core = { version = "0.1.0", path = "../../core/rust" }
+database-mcp-rs-core = { version = "0.1.1", path = "../../core/rust" }
 # Local files and remote (Turso/sqld) only; no embedded-replica stack.
 libsql = { version = "0.10", default-features = false, features = ["core", "remote", "tls"] }
 serde_json = { version = "1.0", features = ["preserve_order"] }

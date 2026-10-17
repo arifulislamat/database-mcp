@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.1
+
+- Security: read-only now holds on every query to a remote libSQL server.
+  Before, the session pragma did not survive across remote requests.
+- Requires the core release with the SQL guard and redaction fixes
+  (@database-mcp/core 0.5.1).
+
 ## 0.5.0
 
 - Local files: a statement that never yields a row now stops at
