@@ -42,7 +42,11 @@ class LibsqlAdapter:
         # The driver takes a plain path for local files; strip the file:
         # scheme the conformance harness (and the TS line) uses for them.
         url = self._url[5:] if self._url.startswith("file:") else self._url
-        self._db = libsql.connect(url, auth_token=self._token.reveal() if self._token else "")
+        # Autocommit: with the default, a write that returns rows (INSERT ...
+        # RETURNING) was never committed and was lost on close.
+        self._db = libsql.connect(
+            url, auth_token=self._token.reveal() if self._token else "", isolation_level=None
+        )
         if read_only:
             try:
                 self._db.execute("PRAGMA query_only = ON")
@@ -68,7 +72,6 @@ class LibsqlAdapter:
         cur = self._db.execute(sql)
         # Writes come back with an empty description (not None like stdlib sqlite3).
         if not cur.description:
-            self._db.commit()
             return {"columns": [], "rows": [], "rowCount": max(cur.rowcount, 0), "truncated": False}
         columns = [d[0] for d in cur.description]
         fetched = cur.fetchmany(max_rows + 1)

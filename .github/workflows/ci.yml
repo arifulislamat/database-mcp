@@ -136,7 +136,7 @@ jobs:
           npm ci
           uv sync
       - name: Tests
-        run: uv run pytest core/python/tests
+        run: uv run pytest core/python/tests sqlite/python/tests
       - name: Conformance (sqlite, stdio)
         run: node conformance/run.mjs -- uv run database-mcp-sqlite
       - name: Conformance (sqlite, http)
