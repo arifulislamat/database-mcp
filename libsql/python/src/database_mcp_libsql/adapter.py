@@ -5,7 +5,6 @@ adapter's. What differs is the transport: the driver speaks to local files
 and remote servers (libsql:/https:/ws:) with an auth token.
 """
 
-import sys
 from typing import Any
 
 import libsql
@@ -37,23 +36,23 @@ class LibsqlAdapter:
         # here too.
         self._token = Secret(auth_token) if isinstance(auth_token, str) else auth_token
         self._db = None
+        self._remote_read_only = False
 
     def connect(self, *, read_only: bool) -> None:
         # The driver takes a plain path for local files; strip the file:
         # scheme the conformance harness (and the TS line) uses for them.
         url = self._url[5:] if self._url.startswith("file:") else self._url
-        self._db = libsql.connect(url, auth_token=self._token.reveal() if self._token else "")
+        # Autocommit: with the default, a write that returns rows (INSERT ...
+        # RETURNING) was never committed and was lost on close.
+        self._db = libsql.connect(
+            url, auth_token=self._token.reveal() if self._token else "", isolation_level=None
+        )
         if read_only:
-            try:
-                self._db.execute("PRAGMA query_only = ON")
-            except Exception:
-                # Remote servers may not honor per-session pragmas. The SQL
-                # guard still blocks writes; for real protection use a
-                # read-only token.
-                print(
-                    "libsql: session read-only unavailable on this server, use a read-only auth token",
-                    file=sys.stderr,
-                )
+            self._db.execute("PRAGMA query_only = ON")
+        # Remote: the server drops an idle stream and the driver silently
+        # opens a fresh one without the pragma, so query() sets it again
+        # right before every query.
+        self._remote_read_only = read_only and "://" in url
         # Fail fast on bad URL/credentials.
         self._db.execute("SELECT 1")
 
@@ -65,10 +64,11 @@ class LibsqlAdapter:
         assert self._db is not None
         # queryTimeoutMs is enforced by running this adapter under
         # IsolatedAdapter: the driver itself cannot be interrupted.
+        if self._remote_read_only:
+            self._db.execute("PRAGMA query_only = ON")
         cur = self._db.execute(sql)
         # Writes come back with an empty description (not None like stdlib sqlite3).
         if not cur.description:
-            self._db.commit()
             return {"columns": [], "rows": [], "rowCount": max(cur.rowcount, 0), "truncated": False}
         columns = [d[0] for d in cur.description]
         fetched = cur.fetchmany(max_rows + 1)

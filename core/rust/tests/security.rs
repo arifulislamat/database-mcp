@@ -190,3 +190,52 @@ fn sql_guard_read_only_and_multi_statement_classification() {
     assert_eq!(guard_sql("SELECT 'a;b' FROM t", true), None);
     assert_eq!(guard_sql("DELETE FROM t", false), None);
 }
+
+// Shared with the TS and Python tests: bypass attempts across SQL dialects.
+#[test]
+fn sql_guard_shared_dialect_cases() {
+    let path = concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../../conformance/fixtures/guard-cases.json"
+    );
+    let cases: Vec<(String, Option<String>)> =
+        serde_json::from_str(&std::fs::read_to_string(path).unwrap()).unwrap();
+    for (sql, prefix) in cases {
+        let got = guard_sql(&sql, true);
+        match prefix {
+            None => assert_eq!(got, None, "{sql:?}"),
+            Some(p) => assert!(
+                got.as_deref()
+                    .is_some_and(|g| g.starts_with(&format!("{p}:"))),
+                "{sql:?} -> {got:?}"
+            ),
+        }
+    }
+}
+
+#[test]
+fn redact_empty_uri_user_and_key_value_dsn_passwords() {
+    assert_eq!(redact("postgres://:p%40ss@db/x"), "postgres://:***@db/x");
+    assert_eq!(
+        redact("host=db user=app password=hunter2 dbname=x"),
+        "host=db user=app password=*** dbname=x"
+    );
+    assert_eq!(
+        redact("host=db PASSWORD = 'a b' dbname=x"),
+        "host=db PASSWORD = *** dbname=x"
+    );
+}
+
+#[test]
+fn config_guardrail_numbers_must_be_positive_integers() {
+    for v in ["abc", "0", "-5", "1.5"] {
+        let err = load_config(&args(&["--max-rows", v]), &env(&[]), &names("X")).unwrap_err();
+        assert!(err.contains("maxRows must be a positive integer"), "{err}");
+        let err =
+            load_config(&args(&[]), &env(&[("QUERY_TIMEOUT_MS", v)]), &names("X")).unwrap_err();
+        assert!(
+            err.contains("queryTimeoutMs must be a positive integer"),
+            "{err}"
+        );
+    }
+}

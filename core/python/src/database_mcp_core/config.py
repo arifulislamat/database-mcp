@@ -77,6 +77,17 @@ def _first(*values: Any) -> Any:
     return next((v for v in values if v is not None), None)
 
 
+
+def _positive(name: str, value: Any) -> int:
+    """0 or garbage would silently switch a guardrail off."""
+    try:
+        n = int(str(value).strip())
+    except ValueError:
+        n = 0
+    if n < 1:
+        raise ValueError(f"config: {name} must be a positive integer, got '{value}'")
+    return n
+
 def load_config(
     argv: list[str],
     env: Mapping[str, str],
@@ -128,6 +139,7 @@ def load_config(
         try:
             parsed = urlsplit(dsn)
             if parsed.password:
+                register_secret(parsed.password)
                 register_secret(unquote(parsed.password))
         except ValueError:
             pass  # not a URL (e.g. a file path)
@@ -153,9 +165,10 @@ def load_config(
         ),
         guardrails=Guardrails(
             read_only=read_only,
-            max_rows=int(_first(flag("--max-rows"), fg.get("maxRows"), env.get("MAX_ROWS"), 1000)),
-            query_timeout_ms=int(
-                _first(flag("--query-timeout-ms"), fg.get("queryTimeoutMs"), env.get("QUERY_TIMEOUT_MS"), 30000)
+            max_rows=_positive("maxRows", _first(flag("--max-rows"), fg.get("maxRows"), env.get("MAX_ROWS"), 1000)),
+            query_timeout_ms=_positive(
+                "queryTimeoutMs",
+                _first(flag("--query-timeout-ms"), fg.get("queryTimeoutMs"), env.get("QUERY_TIMEOUT_MS"), 30000),
             ),
         ),
         transport=Transport(

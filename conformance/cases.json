@@ -52,6 +52,31 @@
     "note": "MariaDB cannot parse CTE-prefixed DML at all (vector inexpressible); its session layer verified separately — direct writes on a read-only session are rejected by the server."
   },
   {
+    "name": "a comment marker inside a string does not hide a second statement",
+    "tool": "execute_sql",
+    "args": { "sql": "SELECT '--' AS a; DELETE FROM users" },
+    "expect": { "isError": true, "textPrefix": "multi-statement:" }
+  },
+  {
+    "name": "a read cannot switch the session read-only setting off",
+    "tool": "execute_sql",
+    "args": { "sql": "SELECT 1 AS ok" },
+    "argsOverrides": {
+      "postgres": { "sql": "SELECT set_config('default_transaction_read_only', 'off', false) AS ok" }
+    },
+    "expect": { "isError": false, "summaryLine": "1 rows" },
+    "note": "Postgres lets any SELECT change session settings through set_config. The next case checks read-only still holds."
+  },
+  {
+    "name": "read-only still rejects a CTE-smuggled write afterwards",
+    "tool": "execute_sql",
+    "args": { "sql": "WITH d AS (SELECT 1) DELETE FROM users" },
+    "expect": { "isError": true, "textPrefix": "read-only:" },
+    "overrides": {
+      "mariadb": { "isError": true }
+    }
+  },
+  {
     "name": "data unchanged after blocked writes",
     "tool": "execute_sql",
     "args": { "sql": "SELECT count(*) AS n FROM users" },

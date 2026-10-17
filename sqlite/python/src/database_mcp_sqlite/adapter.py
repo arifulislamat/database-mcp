@@ -27,8 +27,12 @@ class SqliteAdapter:
         # the session reject writes too. Layer-two enforcement per the tool
         # contract. mode=rw (not rwc) mirrors fileMustExist in the TS line.
         mode = "ro" if read_only else "rw"
+        # Autocommit, like better-sqlite3 in the TS line. The stdlib default
+        # opens a transaction before every write and leaves committing to the
+        # caller, so a write that returns rows (INSERT ... RETURNING) was
+        # never committed and was lost on close.
         self._db = sqlite3.connect(
-            f"file:{quote(self._path)}?mode={mode}", uri=True, check_same_thread=False
+            f"file:{quote(self._path)}?mode={mode}", uri=True, check_same_thread=False, isolation_level=None
         )
         self._db.row_factory = sqlite3.Row
         if read_only:
@@ -47,7 +51,6 @@ class SqliteAdapter:
         try:
             cur = self._db.execute(sql)
             if cur.description is None:
-                self._db.commit()
                 return {"columns": [], "rows": [], "rowCount": max(cur.rowcount, 0), "truncated": False}
             columns = [d[0] for d in cur.description]
             rows: list[dict[str, Any]] = []

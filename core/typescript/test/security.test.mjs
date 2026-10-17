@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { inspect } from "node:util";
-import { mkdtempSync, writeFileSync, rmSync } from "node:fs";
+import { mkdtempSync, writeFileSync, rmSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Secret, redact, sanitizeDsn, loadConfig, guardSql } from "../dist/index.js";
@@ -95,4 +95,27 @@ test("sql-guard: read-only and multi-statement classification", () => {
   assert.match(guardSql("SELECT 1; SELECT 2", true), /^multi-statement:/);
   assert.equal(guardSql("SELECT 'a;b' FROM t", true), null);
   assert.equal(guardSql("DELETE FROM t", false), null);
+});
+
+// Shared with the Python and Rust tests: bypass attempts across SQL dialects.
+test("sql-guard: shared dialect cases", () => {
+  const cases = JSON.parse(readFileSync(new URL("../../../conformance/fixtures/guard-cases.json", import.meta.url), "utf8"));
+  for (const [sql, prefix] of cases) {
+    const got = guardSql(sql, true);
+    if (prefix === null) assert.equal(got, null, sql);
+    else assert.ok(got?.startsWith(`${prefix}:`), `${JSON.stringify(sql)} -> ${got}`);
+  }
+});
+
+test("redact: empty URI user and key=value DSN passwords", () => {
+  assert.equal(redact("postgres://:p%40ss@db/x"), "postgres://:***@db/x");
+  assert.equal(redact("host=db user=app password=hunter2 dbname=x"), "host=db user=app password=*** dbname=x");
+  assert.equal(redact("host=db PASSWORD = 'a b' dbname=x"), "host=db PASSWORD = *** dbname=x");
+});
+
+test("config: guardrail numbers must be positive integers", () => {
+  for (const v of ["abc", "0", "-5", "1.5"]) {
+    assert.throws(() => loadConfig(["--max-rows", v], {}, { envPrefix: "X" }), /maxRows must be a positive integer/);
+    assert.throws(() => loadConfig([], { QUERY_TIMEOUT_MS: v }, { envPrefix: "X" }), /queryTimeoutMs must be a positive integer/);
+  }
 });

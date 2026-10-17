@@ -1,6 +1,7 @@
 """Mirrors core/typescript/test/security.test.mjs."""
 
 import json
+from pathlib import Path
 
 import pytest
 
@@ -99,3 +100,28 @@ def test_sql_guard_read_only_and_multi_statement_classification():
     assert guard_sql("SELECT 1; SELECT 2", True).startswith("multi-statement:")
     assert guard_sql("SELECT 'a;b' FROM t", True) is None
     assert guard_sql("DELETE FROM t", False) is None
+
+
+# Shared with the TS and Rust tests: bypass attempts across SQL dialects.
+def test_sql_guard_shared_dialect_cases():
+    cases_path = Path(__file__).parents[3] / "conformance" / "fixtures" / "guard-cases.json"
+    for sql, prefix in json.loads(cases_path.read_text()):
+        got = guard_sql(sql, True)
+        if prefix is None:
+            assert got is None, sql
+        else:
+            assert got and got.startswith(f"{prefix}:"), (sql, got)
+
+
+def test_redact_empty_uri_user_and_key_value_dsn_passwords():
+    assert redact("postgres://:p%40ss@db/x") == "postgres://:***@db/x"
+    assert redact("host=db user=app password=hunter2 dbname=x") == "host=db user=app password=*** dbname=x"
+    assert redact("host=db PASSWORD = 'a b' dbname=x") == "host=db PASSWORD = *** dbname=x"
+
+
+@pytest.mark.parametrize("value", ["abc", "0", "-5", "1.5"])
+def test_config_guardrail_numbers_must_be_positive_integers(value):
+    with pytest.raises(ValueError, match="maxRows must be a positive integer"):
+        load_config(["--max-rows", value], {}, env_prefix="X")
+    with pytest.raises(ValueError, match="queryTimeoutMs must be a positive integer"):
+        load_config([], {"QUERY_TIMEOUT_MS": value}, env_prefix="X")

@@ -59,6 +59,7 @@ const types = {
 export class PostgresAdapter implements DatabaseAdapter {
   engine = "postgres";
   private pool!: pg.Pool;
+  private readOnly = true;
 
   constructor(
     private connection: Connection,
@@ -67,6 +68,7 @@ export class PostgresAdapter implements DatabaseAdapter {
 
   async connect({ readOnly }: { readOnly: boolean }): Promise<void> {
     const c = this.connection;
+    this.readOnly = readOnly;
     this.pool = new pg.Pool({
       ...(c.dsn ? { connectionString: c.dsn } : {}),
       host: c.dsn ? undefined : c.host,
@@ -94,7 +96,7 @@ export class PostgresAdapter implements DatabaseAdapter {
   async query(sql: string, { maxRows }: QueryOptions): Promise<QueryResult> {
     // pg returns BIGINT/NUMERIC as strings by default — already JSON-safe.
     // ponytail: rows buffer before the cap; pg-cursor if huge tables matter.
-    const result = await this.pool.query(sql);
+    const result = await this.run(sql);
     if (!result.fields?.length) {
       return { columns: [], rows: [], rowCount: result.rowCount ?? 0, truncated: false };
     }
@@ -102,6 +104,26 @@ export class PostgresAdapter implements DatabaseAdapter {
     const truncated = result.rows.length > maxRows;
     const rows = (result.rows as Record<string, unknown>[]).slice(0, maxRows);
     return { columns, rows, rowCount: rows.length, truncated };
+  }
+
+  /**
+   * The session settings alone are not enough for layer two: a plain
+   * SELECT set_config('default_transaction_read_only', 'off', false) turns
+   * them off for every later query (statement_timeout too). In read-only
+   * mode each query runs in a read-only transaction that is always rolled
+   * back, which also reverts any setting the query changed.
+   */
+  private async run(sql: string): Promise<pg.QueryResult> {
+    if (!this.readOnly) return this.pool.query(sql);
+    const client = await this.pool.connect();
+    let broken: Error | undefined;
+    try {
+      await client.query("BEGIN READ ONLY");
+      return await client.query(sql);
+    } finally {
+      await client.query("ROLLBACK").catch((e: Error) => (broken = e));
+      client.release(broken); // a client stuck in a transaction is dropped
+    }
   }
 
   async listTables(): Promise<TableSummary[]> {
