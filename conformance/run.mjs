@@ -4,7 +4,8 @@
 //
 // Seeds an engine-appropriate fixture (identical tables and rows in every
 // dialect), spawns the server over stdio, and asserts the shared cases.json.
-// MAX_ROWS is pinned to 3 so the truncation case holds. SQLite-family engines
+// MAX_ROWS is pinned to 3 so the truncation case holds, and QUERY_TIMEOUT_MS
+// to 1500 so the runaway-statement case finishes quickly. SQLite-family engines
 // seed a temp file; networked engines seed the docker-compose/CI service
 // (MYSQL_* env, defaults matching docker-compose.yml).
 
@@ -92,6 +93,7 @@ const client = new Client({ name: "conformance", version: "0.0.0" });
 let failures = 0;
 
 let child; // http mode only; stdio's transport owns its own process
+let stdioPid; // the stdio server's pid, so a hung server is reaped too
 
 try {
   if (transport === "http") {
@@ -99,7 +101,7 @@ try {
     const { StreamableHTTPClientTransport } = await import("@modelcontextprotocol/sdk/client/streamableHttp.js");
     const port = 38217;
     child = spawn(command, [...args, "--transport", "http", "--port", String(port)], {
-      env: { ...process.env, ...serverEnv, MAX_ROWS: "3" },
+      env: { ...process.env, ...serverEnv, MAX_ROWS: "3", QUERY_TIMEOUT_MS: "1500" },
       stdio: ["ignore", "ignore", "inherit"],
     });
     let up = false;
@@ -114,22 +116,26 @@ try {
     if (!up) throw new Error("server did not start listening");
     await client.connect(new StreamableHTTPClientTransport(new URL(`http://127.0.0.1:${port}/mcp`)));
   } else {
-    await client.connect(
-      new StdioClientTransport({
-        command,
-        args,
-        env: { ...process.env, ...serverEnv, MAX_ROWS: "3" },
-        stderr: "inherit",
-      }),
-    );
+    const stdio = new StdioClientTransport({
+      command,
+      args,
+      env: { ...process.env, ...serverEnv, MAX_ROWS: "3", QUERY_TIMEOUT_MS: "1500" },
+      stderr: "inherit",
+    });
+    await client.connect(stdio);
+    stdioPid = stdio.pid;
   }
 
   for (const c of cases) {
     const problems = [];
     // An engine-specific override replaces the whole expectation (see cases.json notes).
     const expect = c.overrides?.[engine] ?? c.expect;
+    // Some statements are inexpressible on an engine; argsOverrides swaps in
+    // an equivalent one (see cases.json notes).
+    const toolArgs = c.argsOverrides?.[engine] ?? c.args;
     try {
-      const result = await client.callTool({ name: c.tool, arguments: c.args });
+      // A hung server fails the case instead of hanging the suite.
+      const result = await client.callTool({ name: c.tool, arguments: toolArgs }, undefined, { timeout: 10000 });
       const text = (result.content ?? []).map((b) => b.text ?? "").join("\n");
       const isError = !!result.isError;
 
@@ -160,6 +166,15 @@ try {
 } finally {
   await client.close().catch(() => {});
   child?.kill("SIGTERM");
+  // Closing stdin is not enough for a server stuck in native code; the
+  // default SIGTERM action ends it (uv run forwards SIGTERM to Python).
+  if (stdioPid) {
+    try {
+      process.kill(stdioPid, "SIGTERM");
+    } catch {
+      // already exited
+    }
+  }
   cleanup();
 }
 
