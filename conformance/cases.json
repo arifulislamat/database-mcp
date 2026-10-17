@@ -79,5 +79,12 @@
     "tool": "execute_sql",
     "args": { "sql": "SELECT 1 AS ok" },
     "expect": { "isError": false, "summaryLine": "1 rows" }
+  },
+  {
+    "name": "binary values are lowercase hex",
+    "tool": "execute_sql",
+    "args": { "sql": "SELECT data FROM files WHERE id = 1" },
+    "expect": { "isError": false, "summaryLine": "1 rows", "textContains": ["\"data\":\"00ff10\""] },
+    "note": "BLOB, BYTEA and binary column values are lowercase hex strings in every language (issue #39)."
   }
 ]

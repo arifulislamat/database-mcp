@@ -25,4 +25,11 @@ INSERT INTO orders (id, user_id, amount) VALUES
   (2, 1, 5.00),
   (3, 3, 42.50);
 
-ANALYZE TABLE users, orders;
+CREATE TABLE files (
+  id INT PRIMARY KEY,
+  data VARBINARY(16)
+);
+
+INSERT INTO files (id, data) VALUES (1, x'00ff10');
+
+ANALYZE TABLE users, orders, files;

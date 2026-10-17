@@ -45,7 +45,7 @@ if (engine === "mysql" || engine === "mariadb") {
   };
   const { default: mysql } = await import("mysql2/promise");
   const conn = await mysql.createConnection({ ...cfg, multipleStatements: true });
-  await conn.query("DROP TABLE IF EXISTS orders; DROP TABLE IF EXISTS users;");
+  await conn.query("DROP TABLE IF EXISTS orders; DROP TABLE IF EXISTS users; DROP TABLE IF EXISTS files;");
   await conn.query(readFileSync(join(here, "fixtures", "seed.mysql.sql"), "utf8"));
   await conn.end();
   serverEnv = {
@@ -66,7 +66,7 @@ if (engine === "mysql" || engine === "mariadb") {
   const { default: pg } = await import("pg");
   const client = new pg.Client(cfg);
   await client.connect();
-  await client.query("DROP TABLE IF EXISTS orders, users CASCADE");
+  await client.query("DROP TABLE IF EXISTS orders, users, files CASCADE");
   await client.query(readFileSync(join(here, "fixtures", "seed.postgres.sql"), "utf8"));
   await client.end();
   serverEnv = {
