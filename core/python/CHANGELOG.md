@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.1
+
+- Cap the MCP Python SDK below 2.0 (`mcp>=1.9,<2`). SDK 2.0 removed the
+  low-level decorator API this server uses, so every fresh install since
+  late August 2026 crashed at startup with "'Server' object has no
+  attribute 'list_tools'". Engines pick up this fix automatically.
+
 ## 0.2.0
 
 - New `IsolatedAdapter`: runs an adapter in a child process so a driver
