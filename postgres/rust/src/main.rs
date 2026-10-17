@@ -5,7 +5,7 @@ use std::sync::Arc;
 
 use database_mcp_rs_core::{Adapter, Config, EnvNames, QueryResult, Secret, log, run};
 use serde_json::{Map, Value, json};
-use tokio_postgres::types::Type;
+use tokio_postgres::types::{Kind, Type};
 use tokio_postgres::{Client, SimpleQueryMessage};
 use tokio_postgres_rustls::MakeRustlsConnect;
 
@@ -47,7 +47,76 @@ fn to_json(text: &str, ty: &Type) -> Value {
                 iso
             })
         }
-        _ => Value::String(text.into()),
+        _ => match ty.kind() {
+            // Arrays as JSON arrays, like the TS and Python lines; text that
+            // does not parse stays as Postgres printed it.
+            Kind::Array(element) => {
+                parse_array(text, element).unwrap_or(Value::String(text.into()))
+            }
+            _ => Value::String(text.into()),
+        },
+    }
+}
+
+/// Postgres array text (`{1,2}`, `{"a b",NULL}`, `{{1,2},{3,4}}`, optionally
+/// prefixed with bounds like `[0:1]=`) to nested JSON arrays, each element
+/// converted by the element type.
+fn parse_array(text: &str, element: &Type) -> Option<Value> {
+    let body = match text.split_once('=') {
+        Some((bounds, rest)) if bounds.starts_with('[') => rest,
+        _ => text,
+    };
+    let mut chars = body.chars().peekable();
+    let value = parse_level(&mut chars, element)?;
+    chars.next().is_none().then_some(value)
+}
+
+fn parse_level(chars: &mut std::iter::Peekable<std::str::Chars>, element: &Type) -> Option<Value> {
+    if chars.next()? != '{' {
+        return None;
+    }
+    let mut items = Vec::new();
+    if chars.peek() == Some(&'}') {
+        chars.next();
+        return Some(Value::Array(items));
+    }
+    loop {
+        match chars.peek()? {
+            '{' => items.push(parse_level(chars, element)?),
+            '"' => {
+                chars.next();
+                let mut s = String::new();
+                loop {
+                    match chars.next()? {
+                        '\\' => s.push(chars.next()?),
+                        '"' => break,
+                        c => s.push(c),
+                    }
+                }
+                items.push(to_json(&s, element));
+            }
+            _ => {
+                let mut s = String::new();
+                while let Some(&c) = chars.peek() {
+                    if c == ',' || c == '}' {
+                        break;
+                    }
+                    s.push(c);
+                    chars.next();
+                }
+                // Only an unquoted NULL is null; "NULL" in quotes is text.
+                items.push(if s == "NULL" {
+                    Value::Null
+                } else {
+                    to_json(&s, element)
+                });
+            }
+        }
+        match chars.next()? {
+            ',' => continue,
+            '}' => return Some(Value::Array(items)),
+            _ => return None,
+        }
     }
 }
 
@@ -369,5 +438,30 @@ impl Adapter for PostgresAdapter {
         }
 
         Ok(json!({ "name": table, "columns": columns, "indexes": indexes, "foreignKeys": fks }))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn arrays_parse_by_element_type() {
+        let int_array = Type::INT4_ARRAY;
+        assert_eq!(to_json("{1,2}", &int_array), json!([1, 2]));
+        assert_eq!(
+            to_json("{{1,2},{3,NULL}}", &int_array),
+            json!([[1, 2], [3, null]])
+        );
+        assert_eq!(to_json("[0:1]={1,2}", &int_array), json!([1, 2]));
+        assert_eq!(to_json("{}", &int_array), json!([]));
+        let text_array = Type::TEXT_ARRAY;
+        assert_eq!(
+            to_json(r#"{plain,"a b","q\"uote","NULL",NULL}"#, &text_array),
+            json!(["plain", "a b", "q\"uote", "NULL", null])
+        );
+        assert_eq!(to_json("{t,f}", &Type::BOOL_ARRAY), json!([true, false]));
+        // Not an array literal: kept as Postgres printed it.
+        assert_eq!(to_json("{1,2", &int_array), json!("{1,2"));
     }
 }
