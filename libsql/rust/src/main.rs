@@ -7,7 +7,7 @@
 use std::process::ExitCode;
 use std::time::Duration;
 
-use database_mcp_rs_core::{Adapter, Config, EnvNames, QueryResult, log, run};
+use database_mcp_rs_core::{Adapter, Config, EnvNames, QueryResult, run};
 use libsql::{Builder, Connection, Database, OpenFlags, Value as Sql};
 use serde_json::{Map, Value, json};
 
@@ -47,6 +47,7 @@ fn int(v: &Sql) -> i64 {
 
 struct LibsqlAdapter {
     conn: Connection,
+    remote_read_only: bool,
     // The connection borrows from the database handle; keep it alive.
     _db: Database,
 }
@@ -72,6 +73,9 @@ impl LibsqlAdapter {
     }
 
     async fn run_query(&self, sql: &str, max_rows: usize) -> libsql::Result<QueryResult> {
+        if self.remote_read_only {
+            self.conn.execute("PRAGMA query_only = ON", ()).await?;
+        }
         let stmt = self.conn.prepare(sql).await?;
         let columns: Vec<String> = stmt
             .columns()
@@ -158,15 +162,21 @@ impl Adapter for LibsqlAdapter {
         };
         let conn = db.connect().map_err(err)?;
 
-        if read_only && conn.execute("PRAGMA query_only = ON", ()).await.is_err() {
-            // Remote servers may not honor per-session pragmas. The SQL
-            // guard still blocks writes; for real protection use a
-            // read-only token.
-            log("libsql: session read-only unavailable on this server, use a read-only auth token");
+        if read_only {
+            conn.execute("PRAGMA query_only = ON", ())
+                .await
+                .map_err(err)?;
         }
         // Fail fast on bad URL/credentials.
         conn.query("SELECT 1", ()).await.map_err(err)?;
-        Ok(LibsqlAdapter { conn, _db: db })
+        // Remote: the server drops an idle stream and the driver silently
+        // opens a fresh one without the pragma, so run_query() sets it again
+        // right before every query.
+        Ok(LibsqlAdapter {
+            conn,
+            remote_read_only: read_only && remote,
+            _db: db,
+        })
     }
 
     async fn query(

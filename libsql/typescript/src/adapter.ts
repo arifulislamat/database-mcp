@@ -29,6 +29,7 @@ function jsonSafe(value: unknown): unknown {
 export class LibsqlAdapter implements DatabaseAdapter {
   engine = "libsql";
   private client!: Client;
+  private remoteReadOnly = false;
 
   constructor(
     private url: string,
@@ -43,15 +44,11 @@ export class LibsqlAdapter implements DatabaseAdapter {
       authToken: this.authToken?.reveal(),
       intMode: "bigint",
     });
-    if (readOnly) {
-      try {
-        await this.client.execute("PRAGMA query_only = ON");
-      } catch {
-        // Remote servers may not honor per-session pragmas. The SQL guard
-        // still blocks writes; for real protection use a read-only token.
-        console.error("libsql: session read-only unavailable on this server — use a read-only auth token");
-      }
-    }
+    // Remote: every execute() opens and closes its own stream, so a session
+    // pragma never reaches the next query. Each query runs in a read-only
+    // transaction instead (see query()).
+    this.remoteReadOnly = readOnly && !url.startsWith("file:");
+    if (readOnly && !this.remoteReadOnly) await this.client.execute("PRAGMA query_only = ON");
     // Fail fast on bad URL/credentials.
     await this.client.execute("SELECT 1");
   }
@@ -68,7 +65,10 @@ export class LibsqlAdapter implements DatabaseAdapter {
     const timeout = new Promise<never>((_, reject) =>
       setTimeout(() => reject(new Error(`timeout: query exceeded ${timeoutMs}ms`)), timeoutMs).unref(),
     );
-    const rs = await Promise.race([this.client.execute(sql), timeout]);
+    const run = this.remoteReadOnly
+      ? this.client.batch([sql], "read").then(([rs]) => rs)
+      : this.client.execute(sql);
+    const rs = await Promise.race([run, timeout]);
 
     if (rs.columns.length === 0) {
       return { columns: [], rows: [], rowCount: Number(rs.rowsAffected), truncated: false };
