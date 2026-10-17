@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.0
+
+- A statement that never yields a row now stops at `queryTimeoutMs` instead
+  of hanging the server; queries run in an isolated child process (#38).
+- BLOB values are lowercase hex instead of Node's Buffer JSON (#39).
+- Requires `@database-mcp/core` 0.5.
+
 Behavior inherited from core (config, guardrails, transports, secret
 handling) is tracked in the
 [@database-mcp/core changelog](https://github.com/arifulislamat/database-mcp/blob/main/core/typescript/CHANGELOG.md).

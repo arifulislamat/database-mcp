@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.1
+
+- First release built by the release workflow, with prebuilt binaries for
+  macOS, Linux and Windows. No code changes.
+
 ## 0.1.0
 
 - Initial release: MariaDB MCP server, the database-mcp-rs-mysql adapter

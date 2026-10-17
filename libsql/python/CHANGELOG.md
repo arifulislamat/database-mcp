@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.0
+
+- A runaway statement now stops at `queryTimeoutMs` instead of hanging the
+  server: the driver cannot interrupt, so queries run in an isolated child
+  process (#38).
+- BLOB values are lowercase hex instead of failing to serialize (#39).
+
 ## 0.1.0
 
 - Initial release: libSQL MCP server on database-mcp-core (Python), local

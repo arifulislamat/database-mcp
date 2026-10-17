@@ -235,7 +235,7 @@ wheels = [
 
 [[package]]
 name = "database-mcp-core"
-version = "0.1.0"
+version = "0.2.0"
 source = { editable = "core/python" }
 dependencies = [
     { name = "mcp" },
@@ -258,7 +258,7 @@ dev = [{ name = "pytest", specifier = ">=8" }]
 
 [[package]]
 name = "database-mcp-libsql"
-version = "0.1.0"
+version = "0.2.0"
 source = { editable = "libsql/python" }
 dependencies = [
     { name = "database-mcp-core" },
@@ -273,7 +273,7 @@ requires-dist = [
 
 [[package]]
 name = "database-mcp-mariadb"
-version = "0.1.0"
+version = "0.2.0"
 source = { editable = "mariadb/python" }
 dependencies = [
     { name = "database-mcp-core" },
@@ -288,7 +288,7 @@ requires-dist = [
 
 [[package]]
 name = "database-mcp-mysql"
-version = "0.1.0"
+version = "0.2.0"
 source = { editable = "mysql/python" }
 dependencies = [
     { name = "database-mcp-core" },
@@ -303,7 +303,7 @@ requires-dist = [
 
 [[package]]
 name = "database-mcp-postgres"
-version = "0.1.0"
+version = "0.2.0"
 source = { editable = "postgres/python" }
 dependencies = [
     { name = "database-mcp-core" },
@@ -318,7 +318,7 @@ requires-dist = [
 
 [[package]]
 name = "database-mcp-sqlite"
-version = "0.1.0"
+version = "0.2.0"
 source = { editable = "sqlite/python" }
 dependencies = [
     { name = "database-mcp-core" },

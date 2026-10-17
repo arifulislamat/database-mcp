@@ -465,7 +465,7 @@ dependencies = [
 
 [[package]]
 name = "database-mcp-rs-libsql"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "database-mcp-rs-core",
  "libsql",
@@ -475,7 +475,7 @@ dependencies = [
 
 [[package]]
 name = "database-mcp-rs-mariadb"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "database-mcp-rs-core",
  "database-mcp-rs-mysql",
@@ -483,7 +483,7 @@ dependencies = [
 
 [[package]]
 name = "database-mcp-rs-mysql"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "database-mcp-rs-core",
  "mysql_async",
@@ -493,7 +493,7 @@ dependencies = [
 
 [[package]]
 name = "database-mcp-rs-postgres"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "database-mcp-rs-core",
  "rustls 0.23.46",
@@ -506,7 +506,7 @@ dependencies = [
 
 [[package]]
 name = "database-mcp-rs-sqlite"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "database-mcp-rs-core",
  "rusqlite",

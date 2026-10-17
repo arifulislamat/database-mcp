@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.0
+
+- Arrays are returned as JSON arrays (nested, with NULLs), matching the TS
+  and Python lines.
+- `timestamptz` offsets print as `+hh:mm`.
+- First release built by the release workflow, with prebuilt binaries.
+
 ## 0.1.0
 
 - Initial release: PostgreSQL MCP server on database-mcp-rs-core,

@@ -1,6 +1,6 @@
 [package]
 name = "database-mcp-rs-sqlite"
-version = "0.1.0"
+version = "0.1.1"
 description = "MCP server for SQLite with read-only guardrails, row caps, and statement timeouts"
 readme = "README.md"
 keywords = ["mcp", "ai", "sqlite", "database", "sql"]
