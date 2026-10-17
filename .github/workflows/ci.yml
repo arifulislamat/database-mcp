@@ -155,6 +155,13 @@ jobs:
         run: node conformance/run.mjs --engine postgres -- uv run database-mcp-postgres
       - name: Secret leak check (postgres)
         run: node conformance/leak-postgres.mjs -- uv run database-mcp-postgres
+      # uv.lock pins what CI tests; a fresh install resolves the newest
+      # versions our ranges allow. Test those too, so a breaking upstream
+      # release (MCP SDK 2.0 broke every fresh install) fails CI, not users.
+      - name: Conformance with the newest allowed dependencies
+        run: |
+          uv sync --upgrade
+          node conformance/run.mjs -- uv run database-mcp-sqlite
 
   rust:
     runs-on: ubuntu-latest
