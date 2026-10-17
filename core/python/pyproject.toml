@@ -1,13 +1,13 @@
 [project]
 name = "database-mcp-core"
-version = "0.2.1"
+version = "0.3.0"
 description = "Engine-agnostic core for database-mcp MCP servers: protocol layer, adapter interface, guardrails, SQL guard"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.11"
 authors = [{ name = "Ariful Islam" }]
 keywords = ["mcp", "model-context-protocol", "database", "sql"]
-dependencies = ["mcp>=1.9,<2", "pyyaml>=6.0"]
+dependencies = ["jsonschema>=4.20", "mcp>=2.0,<3", "pyyaml>=6.0"]
 
 [project.urls]
 Homepage = "https://github.com/arifulislamat/database-mcp#readme"
