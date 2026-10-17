@@ -1,0 +1,25 @@
+[package]
+name = "database-mcp-rs-mysql"
+version = "0.1.0"
+description = "MCP server for MySQL with read-only guardrails, row caps, and statement timeouts"
+readme = "README.md"
+keywords = ["mcp", "model-context-protocol", "mysql", "database", "sql"]
+categories = ["database", "command-line-utilities"]
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+rust-version.workspace = true
+
+# The command matches the npm and PyPI packages; only the crate name carries -rs.
+[[bin]]
+name = "database-mcp-mysql"
+path = "src/main.rs"
+
+[dependencies]
+database-mcp-rs-core = { version = "0.1.0", path = "../../core/rust" }
+# No TLS, matching the TS and Python lines; pure-Rust compression backend.
+mysql_async = { version = "0.37.1", default-features = false, features = ["minimal-rust"] }
+serde_json = { version = "1.0", features = ["preserve_order"] }
+tokio = { version = "1.53", features = ["macros", "rt-multi-thread", "time"] }

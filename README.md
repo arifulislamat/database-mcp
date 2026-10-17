@@ -29,7 +29,7 @@ language. Every engine is also listed on the
 [MCP Registry](https://registry.modelcontextprotocol.io) with both install
 options.
 
-A Rust line is in progress (SQLite and libSQL so far, crates named `database-mcp-rs-*`).
+A Rust line is in progress (SQLite, libSQL and MySQL so far, crates named `database-mcp-rs-*`).
 Go is planned.
 
 ## Design principles
