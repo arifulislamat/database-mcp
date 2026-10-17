@@ -29,7 +29,8 @@ language. Every engine is also listed on the
 [MCP Registry](https://registry.modelcontextprotocol.io) with both install
 options.
 
-Go and Rust implementations are planned.
+A Rust line is in progress (SQLite first, crates named `database-mcp-rs-*`).
+Go is planned.
 
 ## Design principles
 

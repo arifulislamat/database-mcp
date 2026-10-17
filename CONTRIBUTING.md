@@ -37,6 +37,15 @@ uv run pytest core/python/tests
 node conformance/run.mjs -- uv run database-mcp-sqlite
 ```
 
+Rust servers (a Cargo workspace):
+
+```bash
+npm install          # the conformance suite runs on Node
+cargo test --workspace
+cargo build --workspace
+node conformance/run.mjs -- target/debug/database-mcp-sqlite
+```
+
 General form: `node conformance/run.mjs [--engine <engine>] [--transport http] -- <command to launch the server> [args...]`.
 
 SQLite needs no infrastructure (the suite seeds a temp file). Networked
