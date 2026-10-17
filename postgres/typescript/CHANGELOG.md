@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.0
+
+- `date`, `timestamp` and `timestamptz` are returned as stored, no longer
+  shifted through the server's local timezone, including inside arrays;
+  offsets print as `+hh:mm` (#46).
+- `numeric[]` elements stay strings, like a scalar NUMERIC.
+- BYTEA values are lowercase hex (#39).
+- Requires `@database-mcp/core` 0.5.
+
 Behavior inherited from core (config, guardrails, transports, secret
 handling) is tracked in the
 [@database-mcp/core changelog](https://github.com/arifulislamat/database-mcp/blob/main/core/typescript/CHANGELOG.md).

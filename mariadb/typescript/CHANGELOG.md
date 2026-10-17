@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.0
+
+- Picks up `@database-mcp/mysql` 0.5: dates returned as stored (#46) and
+  binary values as lowercase hex (#39).
+
 Behavior inherited from core (config, guardrails, transports, secret
 handling) is tracked in the
 [@database-mcp/core changelog](https://github.com/arifulislamat/database-mcp/blob/main/core/typescript/CHANGELOG.md).

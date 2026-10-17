@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.0
+
+- DATE and DATETIME/TIMESTAMP are returned as stored, no longer shifted
+  through the server's local timezone; date-times use ISO 8601's T
+  separator (#46).
+- Binary values are lowercase hex (#39).
+- Requires `@database-mcp/core` 0.5.
+
 Behavior inherited from core (config, guardrails, transports, secret
 handling) is tracked in the
 [@database-mcp/core changelog](https://github.com/arifulislamat/database-mcp/blob/main/core/typescript/CHANGELOG.md).

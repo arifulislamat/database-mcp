@@ -1,6 +1,6 @@
 [package]
 name = "database-mcp-rs-postgres"
-version = "0.1.0"
+version = "0.2.0"
 description = "MCP server for PostgreSQL with read-only guardrails, row caps, and statement timeouts"
 readme = "README.md"
 keywords = ["mcp", "ai", "postgres", "postgresql", "database"]

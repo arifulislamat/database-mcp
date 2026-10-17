@@ -1,13 +1,13 @@
 [project]
 name = "database-mcp-libsql"
-version = "0.1.0"
+version = "0.2.0"
 description = "MCP server for libSQL/Turso (local files and remote databases) with read-only guardrails, row caps, and statement timeouts"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.11"
 authors = [{ name = "Ariful Islam" }]
 keywords = ["mcp", "model-context-protocol", "libsql", "turso", "sqlite", "database", "sql"]
-dependencies = ["database-mcp-core>=0.1.0", "libsql>=0.1.11"]
+dependencies = ["database-mcp-core>=0.2.0", "libsql>=0.1.11"]
 
 [project.scripts]
 database-mcp-libsql = "database_mcp_libsql:main"

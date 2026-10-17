@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.0
+
+- New `IsolatedAdapter`: runs an adapter in a child process so a statement
+  stuck in a synchronous driver can be stopped at `queryTimeoutMs` (#38).
+- Binary values (BLOB, BYTEA, BINARY) are returned as lowercase hex strings,
+  now part of the tool contract (#39).
+
 ## 0.4.2
 
 - Fix #18: `--print-config` printed the password embedded in a DSN

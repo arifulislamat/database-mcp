@@ -1,13 +1,13 @@
 [project]
 name = "database-mcp-sqlite"
-version = "0.1.0"
+version = "0.2.0"
 description = "MCP server for SQLite with read-only guardrails, row caps, and statement timeouts"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.11"
 authors = [{ name = "Ariful Islam" }]
 keywords = ["mcp", "model-context-protocol", "sqlite", "database", "sql"]
-dependencies = ["database-mcp-core>=0.1.0"]
+dependencies = ["database-mcp-core>=0.2.0"]
 
 [project.scripts]
 database-mcp-sqlite = "database_mcp_sqlite:main"

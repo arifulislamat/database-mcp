@@ -1,13 +1,13 @@
 [project]
 name = "database-mcp-postgres"
-version = "0.1.0"
+version = "0.2.0"
 description = "MCP server for PostgreSQL with read-only guardrails, row caps, and statement timeouts"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.11"
 authors = [{ name = "Ariful Islam" }]
 keywords = ["mcp", "model-context-protocol", "postgres", "postgresql", "database", "sql"]
-dependencies = ["database-mcp-core>=0.1.0", "psycopg[binary]>=3.1"]
+dependencies = ["database-mcp-core>=0.2.0", "psycopg[binary]>=3.1"]
 
 [project.scripts]
 database-mcp-postgres = "database_mcp_postgres:main"
