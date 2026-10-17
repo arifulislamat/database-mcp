@@ -13,7 +13,10 @@ _JS_SAFE_MAX = 2**53 - 1
 
 
 def _json_safe(value: Any) -> Any:
-    """BIGINT/NUMERIC beyond JS safe range and temporal types become strings."""
+    """BIGINT/NUMERIC beyond JS safe range and temporal types become strings,
+    inside arrays too."""
+    if isinstance(value, list):
+        return [_json_safe(v) for v in value]
     if isinstance(value, int) and not isinstance(value, bool) and abs(value) > _JS_SAFE_MAX:
         return str(value)
     if isinstance(value, Decimal):
