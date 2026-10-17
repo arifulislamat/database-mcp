@@ -1,0 +1,105 @@
+name: Release (Rust)
+
+# Tag-triggered only, never per-merge. The tag prefix selects the crate:
+#   sqlite-rs-v0.2.0 -> database-mcp-rs-sqlite,  core-rs-v0.2.0 -> database-mcp-rs-core, ...
+on:
+  push:
+    tags:
+      - "*-rs-v*"
+
+permissions:
+  contents: write
+  id-token: write # crates.io trusted publishing, no long-lived token
+
+jobs:
+  parse:
+    runs-on: ubuntu-latest
+    outputs:
+      package: ${{ steps.tag.outputs.package }}
+      version: ${{ steps.tag.outputs.version }}
+    steps:
+      - name: Parse tag
+        id: tag
+        run: |
+          # <pkg>-rs-v<version>
+          TAG="${GITHUB_REF_NAME}"
+          echo "package=${TAG%-rs-v*}" >> "$GITHUB_OUTPUT"
+          echo "version=${TAG##*-rs-v}" >> "$GITHUB_OUTPUT"
+
+  publish:
+    needs: parse
+    runs-on: ubuntu-latest
+    # One environment for all six crates: crates.io has no unique-tuple rule,
+    # and a dedicated environment can require approval before any publish.
+    environment: crates-io
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install
+        run: npm ci
+      - name: Version matches tag
+        run: |
+          grep -q "^version = \"${{ needs.parse.outputs.version }}\"$" \
+            "${{ needs.parse.outputs.package }}/rust/Cargo.toml" \
+            || { echo "Cargo.toml version does not match the tag; run scripts/bump-version.mjs first"; exit 1; }
+      - name: Conformance (never publish unverified code)
+        run: |
+          cargo build -p database-mcp-rs-sqlite
+          node conformance/run.mjs -- target/debug/database-mcp-sqlite
+      - uses: rust-lang/crates-io-auth-action@v1
+        id: auth
+      - name: Publish
+        run: cargo publish -p database-mcp-rs-${{ needs.parse.outputs.package }}
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
+      - name: GitHub release
+        run: gh release create "$GITHUB_REF_NAME" --generate-notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  # Prebuilt binaries so users need neither Rust nor Node/Python. The core
+  # crate is a library and has none.
+  binaries:
+    needs: [parse, publish]
+    if: needs.parse.outputs.package != 'core'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { target: aarch64-apple-darwin, os: macos-latest }
+          - { target: x86_64-apple-darwin, os: macos-latest }
+          # 22.04 for an older glibc baseline, so the binary runs on more distros.
+          - { target: x86_64-unknown-linux-gnu, os: ubuntu-22.04 }
+          - { target: aarch64-unknown-linux-gnu, os: ubuntu-22.04-arm }
+          - { target: x86_64-pc-windows-msvc, os: windows-latest }
+    runs-on: ${{ matrix.os }}
+    env:
+      BIN: database-mcp-${{ needs.parse.outputs.package }}
+      ARCHIVE: database-mcp-${{ needs.parse.outputs.package }}-${{ needs.parse.outputs.version }}-${{ matrix.target }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - name: Build
+        run: cargo build --release --locked -p database-mcp-rs-${{ needs.parse.outputs.package }} --target ${{ matrix.target }}
+      - name: Package (unix)
+        if: runner.os != 'Windows'
+        run: |
+          tar -czf "$ARCHIVE.tar.gz" -C "target/${{ matrix.target }}/release" "$BIN"
+          shasum -a 256 "$ARCHIVE.tar.gz" > "$ARCHIVE.tar.gz.sha256"
+      - name: Package (windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Compress-Archive -Path "target/${{ matrix.target }}/release/$env:BIN.exe" -DestinationPath "$env:ARCHIVE.zip"
+          $hash = (Get-FileHash "$env:ARCHIVE.zip" -Algorithm SHA256).Hash.ToLower()
+          "$hash  $env:ARCHIVE.zip" | Out-File -Encoding ascii "$env:ARCHIVE.zip.sha256"
+      - name: Upload to the release
+        shell: bash
+        run: gh release upload "$GITHUB_REF_NAME" "$ARCHIVE".* --clobber
+        env:
+          GH_TOKEN: ${{ github.token }}

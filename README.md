@@ -4,34 +4,35 @@
 [![License: MIT](https://img.shields.io/github/license/arifulislamat/database-mcp)](LICENSE)
 [![npm](https://img.shields.io/npm/v/%40database-mcp%2Fcore?label=%40database-mcp%2Fcore)](https://www.npmjs.com/package/@database-mcp/core)
 [![PyPI](https://img.shields.io/pypi/v/database-mcp-core?label=database-mcp-core)](https://pypi.org/project/database-mcp-core/)
+[![crates.io](https://img.shields.io/crates/v/database-mcp-rs-core?label=database-mcp-rs-core)](https://crates.io/crates/database-mcp-rs-core)
 [![Node >= 20](https://img.shields.io/node/v/%40database-mcp%2Fcore)](https://nodejs.org)
 
 MCP servers that give AI clients safe, structured access to SQL databases.
 
-One installable package per database engine, in TypeScript (npm) and Python
-(PyPI). Every package exposes the same minimal two-tool surface,
-`execute_sql` and `search_objects`, with guardrails on by default: read-only
-mode, row caps, and statement timeouts.
+One installable package per database engine, in TypeScript (npm), Python
+(PyPI), and Rust (crates.io). Every package exposes the same minimal
+two-tool surface, `execute_sql` and `search_objects`, with guardrails on by
+default: read-only mode, row caps, and statement timeouts.
 
 ## Packages
 
-| Engine   | TypeScript (npm) | Python (PyPI) |
-| -------- | ---------------- | ------------- |
-| SQLite   | [`@database-mcp/sqlite`](https://www.npmjs.com/package/@database-mcp/sqlite) [![npm](https://img.shields.io/npm/v/%40database-mcp%2Fsqlite?label=)](https://www.npmjs.com/package/@database-mcp/sqlite)   | [`database-mcp-sqlite`](https://pypi.org/project/database-mcp-sqlite/) [![PyPI](https://img.shields.io/pypi/v/database-mcp-sqlite?label=)](https://pypi.org/project/database-mcp-sqlite/)   |
-| libSQL   | [`@database-mcp/libsql`](https://www.npmjs.com/package/@database-mcp/libsql) [![npm](https://img.shields.io/npm/v/%40database-mcp%2Flibsql?label=)](https://www.npmjs.com/package/@database-mcp/libsql)   | [`database-mcp-libsql`](https://pypi.org/project/database-mcp-libsql/) [![PyPI](https://img.shields.io/pypi/v/database-mcp-libsql?label=)](https://pypi.org/project/database-mcp-libsql/)   |
-| MySQL    | [`@database-mcp/mysql`](https://www.npmjs.com/package/@database-mcp/mysql) [![npm](https://img.shields.io/npm/v/%40database-mcp%2Fmysql?label=)](https://www.npmjs.com/package/@database-mcp/mysql)    | [`database-mcp-mysql`](https://pypi.org/project/database-mcp-mysql/) [![PyPI](https://img.shields.io/pypi/v/database-mcp-mysql?label=)](https://pypi.org/project/database-mcp-mysql/)    |
-| MariaDB  | [`@database-mcp/mariadb`](https://www.npmjs.com/package/@database-mcp/mariadb) [![npm](https://img.shields.io/npm/v/%40database-mcp%2Fmariadb?label=)](https://www.npmjs.com/package/@database-mcp/mariadb)  | [`database-mcp-mariadb`](https://pypi.org/project/database-mcp-mariadb/) [![PyPI](https://img.shields.io/pypi/v/database-mcp-mariadb?label=)](https://pypi.org/project/database-mcp-mariadb/)  |
-| Postgres | [`@database-mcp/postgres`](https://www.npmjs.com/package/@database-mcp/postgres) [![npm](https://img.shields.io/npm/v/%40database-mcp%2Fpostgres?label=)](https://www.npmjs.com/package/@database-mcp/postgres) | [`database-mcp-postgres`](https://pypi.org/project/database-mcp-postgres/) [![PyPI](https://img.shields.io/pypi/v/database-mcp-postgres?label=)](https://pypi.org/project/database-mcp-postgres/) |
+| Engine   | TypeScript (npm) | Python (PyPI) | Rust (crates.io) |
+| -------- | ---------------- | ------------- | ---------------- |
+| SQLite   | [`@database-mcp/sqlite`](https://www.npmjs.com/package/@database-mcp/sqlite) [![npm](https://img.shields.io/npm/v/%40database-mcp%2Fsqlite?label=)](https://www.npmjs.com/package/@database-mcp/sqlite)   | [`database-mcp-sqlite`](https://pypi.org/project/database-mcp-sqlite/) [![PyPI](https://img.shields.io/pypi/v/database-mcp-sqlite?label=)](https://pypi.org/project/database-mcp-sqlite/)   | [`database-mcp-rs-sqlite`](https://crates.io/crates/database-mcp-rs-sqlite) [![crates.io](https://img.shields.io/crates/v/database-mcp-rs-sqlite?label=)](https://crates.io/crates/database-mcp-rs-sqlite) |
+| libSQL   | [`@database-mcp/libsql`](https://www.npmjs.com/package/@database-mcp/libsql) [![npm](https://img.shields.io/npm/v/%40database-mcp%2Flibsql?label=)](https://www.npmjs.com/package/@database-mcp/libsql)   | [`database-mcp-libsql`](https://pypi.org/project/database-mcp-libsql/) [![PyPI](https://img.shields.io/pypi/v/database-mcp-libsql?label=)](https://pypi.org/project/database-mcp-libsql/)   | [`database-mcp-rs-libsql`](https://crates.io/crates/database-mcp-rs-libsql) [![crates.io](https://img.shields.io/crates/v/database-mcp-rs-libsql?label=)](https://crates.io/crates/database-mcp-rs-libsql) |
+| MySQL    | [`@database-mcp/mysql`](https://www.npmjs.com/package/@database-mcp/mysql) [![npm](https://img.shields.io/npm/v/%40database-mcp%2Fmysql?label=)](https://www.npmjs.com/package/@database-mcp/mysql)    | [`database-mcp-mysql`](https://pypi.org/project/database-mcp-mysql/) [![PyPI](https://img.shields.io/pypi/v/database-mcp-mysql?label=)](https://pypi.org/project/database-mcp-mysql/)    | [`database-mcp-rs-mysql`](https://crates.io/crates/database-mcp-rs-mysql) [![crates.io](https://img.shields.io/crates/v/database-mcp-rs-mysql?label=)](https://crates.io/crates/database-mcp-rs-mysql) |
+| MariaDB  | [`@database-mcp/mariadb`](https://www.npmjs.com/package/@database-mcp/mariadb) [![npm](https://img.shields.io/npm/v/%40database-mcp%2Fmariadb?label=)](https://www.npmjs.com/package/@database-mcp/mariadb)  | [`database-mcp-mariadb`](https://pypi.org/project/database-mcp-mariadb/) [![PyPI](https://img.shields.io/pypi/v/database-mcp-mariadb?label=)](https://pypi.org/project/database-mcp-mariadb/)  | [`database-mcp-rs-mariadb`](https://crates.io/crates/database-mcp-rs-mariadb) [![crates.io](https://img.shields.io/crates/v/database-mcp-rs-mariadb?label=)](https://crates.io/crates/database-mcp-rs-mariadb) |
+| Postgres | [`@database-mcp/postgres`](https://www.npmjs.com/package/@database-mcp/postgres) [![npm](https://img.shields.io/npm/v/%40database-mcp%2Fpostgres?label=)](https://www.npmjs.com/package/@database-mcp/postgres) | [`database-mcp-postgres`](https://pypi.org/project/database-mcp-postgres/) [![PyPI](https://img.shields.io/pypi/v/database-mcp-postgres?label=)](https://pypi.org/project/database-mcp-postgres/) | [`database-mcp-rs-postgres`](https://crates.io/crates/database-mcp-rs-postgres) [![crates.io](https://img.shields.io/crates/v/database-mcp-rs-postgres?label=)](https://crates.io/crates/database-mcp-rs-postgres) |
 
-Both lines are published and pass the same language-agnostic conformance
-suite against real databases in CI, so behavior is identical regardless of
-language. Every engine is also listed on the
-[MCP Registry](https://registry.modelcontextprotocol.io) with both install
-options.
+All three lines are published and pass the same language-agnostic
+conformance suite against real databases in CI, so behavior is identical
+regardless of language. Every engine is also listed on the
+[MCP Registry](https://registry.modelcontextprotocol.io) with the npm and
+PyPI install options.
 
-A Rust line covers all five engines too (crates named `database-mcp-rs-*`,
-not yet published).
-Go is planned.
+Rust crates are named `database-mcp-rs-<engine>` because the plain names are
+taken on crates.io; the command each one installs is still
+`database-mcp-<engine>`. Go is planned.
 
 ## Design principles
 
@@ -68,8 +69,14 @@ via npm:
 
 Or via PyPI: use `"command": "uvx"` and
 `"args": ["database-mcp-sqlite", "--dsn", "/absolute/path/to/database.db"]`.
-Flags, environment variables, and YAML config are identical across both
-lines.
+
+Or as a native binary, with no Node or Python runtime: run
+`cargo install database-mcp-rs-sqlite`, then use
+`"command": "database-mcp-sqlite"` with the same `args` minus the package
+name.
+
+Flags, environment variables, and YAML config are identical across all
+three lines.
 
 Networked engines take credentials from the environment (`MYSQL_*`,
 `MARIADB_*`, `POSTGRES_*`/`DATABASE_URL`, `LIBSQL_URL`/`LIBSQL_AUTH_TOKEN`),
