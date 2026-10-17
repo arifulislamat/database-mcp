@@ -84,6 +84,44 @@
           "isSecret": false
         }
       ]
+    },
+    {
+      "registryType": "cargo",
+      "identifier": "database-mcp-rs-postgres",
+      "version": "0.2.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "POSTGRES_HOST",
+          "description": "Database host",
+          "isRequired": true,
+          "format": "string",
+          "isSecret": false
+        },
+        {
+          "name": "POSTGRES_USER",
+          "description": "Database user (a read-only user is recommended)",
+          "isRequired": true,
+          "format": "string",
+          "isSecret": false
+        },
+        {
+          "name": "POSTGRES_PASSWORD",
+          "description": "Database password (or use POSTGRES_PASSWORD_FILE)",
+          "isRequired": false,
+          "format": "string",
+          "isSecret": true
+        },
+        {
+          "name": "POSTGRES_DATABASE",
+          "description": "Database name",
+          "isRequired": true,
+          "format": "string",
+          "isSecret": false
+        }
+      ]
     }
   ]
 }

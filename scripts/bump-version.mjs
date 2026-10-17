@@ -8,13 +8,14 @@
 //   node scripts/bump-version.mjs <core|sqlite|libsql|mysql|mariadb|postgres> <version> [--lang ts|py|rs]
 //     Sets the manifest version (default ts), syncs server.json (ts
 //     engines), verifies the CHANGELOG has a matching heading, and prints
-//     the release tag command. For rs it also updates every Rust crate's
-//     version requirement on the bumped crate (engines pin core; mariadb
-//     pins mysql).
+//     the release tag command. For rs it also syncs the server.json cargo
+//     entry and updates every Rust crate's version requirement on the bumped
+//     crate (engines pin core; mariadb pins mysql).
 //
 //   node scripts/bump-version.mjs --check
-//     Verifies server.json versions match package.json for every engine,
-//     and that Rust crates' requirements on each other match their versions.
+//     Verifies server.json versions match package.json, pyproject.toml and
+//     Cargo.toml for every engine, and that Rust crates' requirements on each
+//     other match their versions.
 //     Run by CI; exits 1 on drift.
 
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
@@ -49,6 +50,13 @@ if (process.argv[2] === "--check") {
         console.error(`DRIFT ${e}: pyproject.toml=${py} server.json pypi entry=${p.version}`);
       }
     }
+    const rs = existsSync(rsPath(e)) ? rsVersion(e) : undefined;
+    for (const p of server.packages.filter((p) => p.registryType === "cargo")) {
+      if (p.version !== rs) {
+        drift++;
+        console.error(`DRIFT ${e}: Cargo.toml=${rs} server.json cargo entry=${p.version}`);
+      }
+    }
   }
   for (const crate of RUST_CRATES.filter((c) => existsSync(rsPath(c)))) {
     const toml = readFileSync(rsPath(crate), "utf8");
@@ -60,7 +68,7 @@ if (process.argv[2] === "--check") {
       }
     }
   }
-  console.log(drift === 0 ? "version check: all server.json in sync with package.json" : `version check: ${drift} package(s) drifted`);
+  console.log(drift === 0 ? "version check: all server.json in sync with package.json, pyproject.toml and Cargo.toml" : `version check: ${drift} package(s) drifted`);
   process.exit(drift === 0 ? 0 : 1);
 }
 
@@ -89,6 +97,14 @@ if (lang === "rs") {
   }
   writeFileSync(path, toml.replace(/^version = "[^"]+"$/m, `version = "${version}"`));
   console.log(`${path}: version -> ${version}`);
+
+  const serverPath = `${pkg}/server.json`;
+  if (existsSync(serverPath)) {
+    const server = read(serverPath);
+    for (const p of server.packages.filter((p) => p.registryType === "cargo")) p.version = version;
+    write(serverPath, server);
+    console.log(`${serverPath}: cargo entry -> ${version}`);
+  }
 
   for (const crate of RUST_CRATES.filter((c) => c !== pkg && existsSync(rsPath(c)))) {
     const dependent = readFileSync(rsPath(crate), "utf8");
