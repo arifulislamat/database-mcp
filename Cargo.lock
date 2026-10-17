@@ -423,6 +423,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "database-mcp-rs-mariadb"
+version = "0.1.0"
+dependencies = [
+ "database-mcp-rs-core",
+ "database-mcp-rs-mysql",
+]
+
+[[package]]
 name = "database-mcp-rs-mysql"
 version = "0.1.0"
 dependencies = [

@@ -1,0 +1,22 @@
+[package]
+name = "database-mcp-rs-mariadb"
+version = "0.1.0"
+description = "MCP server for MariaDB with read-only guardrails, row caps, and statement timeouts"
+readme = "README.md"
+keywords = ["mcp", "model-context-protocol", "mariadb", "database", "sql"]
+categories = ["database", "command-line-utilities"]
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+rust-version.workspace = true
+
+# The command matches the npm and PyPI packages; only the crate name carries -rs.
+[[bin]]
+name = "database-mcp-mariadb"
+path = "src/main.rs"
+
+[dependencies]
+database-mcp-rs-core = { version = "0.1.0", path = "../../core/rust" }
+database-mcp-rs-mysql = { version = "0.1.0", path = "../../mysql/rust" }
