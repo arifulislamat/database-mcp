@@ -32,4 +32,12 @@ CREATE TABLE files (
 
 INSERT INTO files (id, data) VALUES (1, x'00ff10');
 
-ANALYZE TABLE users, orders, files;
+CREATE TABLE events (
+  id INT PRIMARY KEY,
+  day DATE,
+  at DATETIME
+);
+
+INSERT INTO events (id, day, at) VALUES (1, '2024-01-02', '2024-01-02 03:04:05');
+
+ANALYZE TABLE users, orders, files, events;

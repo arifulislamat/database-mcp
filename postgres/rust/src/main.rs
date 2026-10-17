@@ -35,7 +35,18 @@ fn to_json(text: &str, ty: &Type) -> Value {
             serde_json::from_str(text).unwrap_or(Value::String(text.into()))
         }
         Type::BYTEA => Value::String(text.strip_prefix("\\x").unwrap_or(text).into()),
-        Type::TIMESTAMP | Type::TIMESTAMPTZ => Value::String(text.replacen(' ', "T", 1)),
+        Type::TIMESTAMP => Value::String(text.replacen(' ', "T", 1)),
+        // Offsets as +hh:mm, like Python's isoformat (Postgres prints +00).
+        Type::TIMESTAMPTZ => {
+            let iso = text.replacen(' ', "T", 1);
+            let short_offset =
+                iso.len() > 3 && matches!(iso.as_bytes()[iso.len() - 3], b'+' | b'-');
+            Value::String(if short_offset {
+                format!("{iso}:00")
+            } else {
+                iso
+            })
+        }
         _ => Value::String(text.into()),
     }
 }

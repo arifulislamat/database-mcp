@@ -24,6 +24,14 @@ export class MysqlAdapter implements DatabaseAdapter {
       // BIGINT/DECIMAL beyond JS safe range arrive as strings (JSON-safe).
       supportBigNumbers: true,
       bigNumberStrings: false,
+      // Dates stay the stored value. As JS Dates they were shifted through
+      // this process's timezone (issue #46); DATETIME/TIMESTAMP use ISO 8601's
+      // T separator, matching the Python and Rust lines.
+      typeCast: (field: mysql.TypeCastField, next: mysql.TypeCastNext) => {
+        if (field.type === "DATE" || field.type === "NEWDATE") return field.string();
+        if (field.type === "DATETIME" || field.type === "TIMESTAMP") return field.string()?.replace(" ", "T") ?? null;
+        return next();
+      },
     };
     this.pool = c.dsn
       ? mysql.createPool({ uri: c.dsn, ...common })

@@ -5,7 +5,8 @@
 // Seeds an engine-appropriate fixture (identical tables and rows in every
 // dialect), spawns the server over stdio, and asserts the shared cases.json.
 // MAX_ROWS is pinned to 3 so the truncation case holds, and QUERY_TIMEOUT_MS
-// to 1500 so the runaway-statement case finishes quickly. SQLite-family engines
+// to 1500 so the runaway-statement case finishes quickly. Servers run in a
+// non-UTC timezone (TZ) so a date shifted through local time shows up. SQLite-family engines
 // seed a temp file; networked engines seed the docker-compose/CI service
 // (MYSQL_* env, defaults matching docker-compose.yml).
 
@@ -45,7 +46,7 @@ if (engine === "mysql" || engine === "mariadb") {
   };
   const { default: mysql } = await import("mysql2/promise");
   const conn = await mysql.createConnection({ ...cfg, multipleStatements: true });
-  await conn.query("DROP TABLE IF EXISTS orders; DROP TABLE IF EXISTS users; DROP TABLE IF EXISTS files;");
+  await conn.query("DROP TABLE IF EXISTS orders; DROP TABLE IF EXISTS users; DROP TABLE IF EXISTS files; DROP TABLE IF EXISTS events;");
   await conn.query(readFileSync(join(here, "fixtures", "seed.mysql.sql"), "utf8"));
   await conn.end();
   serverEnv = {
@@ -66,7 +67,7 @@ if (engine === "mysql" || engine === "mariadb") {
   const { default: pg } = await import("pg");
   const client = new pg.Client(cfg);
   await client.connect();
-  await client.query("DROP TABLE IF EXISTS orders, users, files CASCADE");
+  await client.query("DROP TABLE IF EXISTS orders, users, files, events CASCADE");
   await client.query(readFileSync(join(here, "fixtures", "seed.postgres.sql"), "utf8"));
   await client.end();
   serverEnv = {
@@ -101,7 +102,7 @@ try {
     const { StreamableHTTPClientTransport } = await import("@modelcontextprotocol/sdk/client/streamableHttp.js");
     const port = 38217;
     child = spawn(command, [...args, "--transport", "http", "--port", String(port)], {
-      env: { ...process.env, ...serverEnv, MAX_ROWS: "3", QUERY_TIMEOUT_MS: "1500" },
+      env: { ...process.env, ...serverEnv, MAX_ROWS: "3", QUERY_TIMEOUT_MS: "1500", TZ: "Asia/Dhaka" },
       stdio: ["ignore", "ignore", "inherit"],
     });
     let up = false;
@@ -119,7 +120,7 @@ try {
     const stdio = new StdioClientTransport({
       command,
       args,
-      env: { ...process.env, ...serverEnv, MAX_ROWS: "3", QUERY_TIMEOUT_MS: "1500" },
+      env: { ...process.env, ...serverEnv, MAX_ROWS: "3", QUERY_TIMEOUT_MS: "1500", TZ: "Asia/Dhaka" },
       stderr: "inherit",
     });
     await client.connect(stdio);

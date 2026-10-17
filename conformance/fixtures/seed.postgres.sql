@@ -33,3 +33,11 @@ CREATE TABLE files (
 );
 
 INSERT INTO files (id, data) VALUES (1, '\x00ff10');
+
+CREATE TABLE events (
+  id INT PRIMARY KEY,
+  day DATE,
+  at TIMESTAMP
+);
+
+INSERT INTO events (id, day, at) VALUES (1, '2024-01-02', '2024-01-02 03:04:05');
