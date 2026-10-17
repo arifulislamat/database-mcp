@@ -1,0 +1,21 @@
+[package]
+name = "database-mcp-rs-core"
+version = "0.1.0"
+description = "Shared core for the database-mcp Rust servers: MCP tools, config, SQL guard, secret handling"
+readme = "README.md"
+keywords = ["mcp", "model-context-protocol", "database", "sql"]
+categories = ["database"]
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+rmcp = { version = "3.5.1", features = ["server", "transport-io", "transport-streamable-http-server"] }
+tokio = { version = "1.53", features = ["macros", "rt-multi-thread", "io-std", "net", "signal"] }
+serde_json = { version = "1.0", features = ["preserve_order"] }
+regex = "1.13"
+yaml-rust2 = "0.13"
+axum = "0.8"
