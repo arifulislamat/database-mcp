@@ -25,7 +25,7 @@ def _json_safe(value: Any) -> Any:
         return str(value)
     if isinstance(value, (datetime.datetime, datetime.date, datetime.time)):
         return value.isoformat()
-    if isinstance(value, (datetime.timedelta, bytes)):
+    if isinstance(value, datetime.timedelta):
         return str(value)
     return value
 

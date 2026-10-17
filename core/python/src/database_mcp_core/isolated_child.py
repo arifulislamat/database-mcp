@@ -6,6 +6,13 @@ import json
 import sys
 
 
+def _hex(value: object) -> str:
+    """Binary values cross the pipe as hex, the contract's form (issue #39)."""
+    if isinstance(value, (bytes, bytearray, memoryview)):
+        return value.hex()
+    return str(value)
+
+
 def main() -> None:
     channel = sys.stdout
     # Nothing but replies may reach the channel; stray prints go to stderr.
@@ -25,7 +32,7 @@ def main() -> None:
                 result = adapter.query(sql, max_rows=max_rows, timeout_ms=timeout_ms)
             else:
                 result = getattr(adapter, op)(*args)
-            channel.write(json.dumps({"result": result}, default=str) + "\n")
+            channel.write(json.dumps({"result": result}, default=_hex) + "\n")
         except Exception as e:
             channel.write(json.dumps({"error": str(e)}) + "\n")
         channel.flush()

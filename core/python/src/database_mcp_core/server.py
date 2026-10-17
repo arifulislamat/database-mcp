@@ -86,6 +86,15 @@ def build_server(adapter: DatabaseAdapter, guardrails: Guardrails, version: str)
     return server
 
 
+def _json_default(value: Any) -> Any:
+    """Binary values (BLOB, BYTEA, BINARY) are returned as lowercase hex in
+    every language (issue #39); json.dumps calls this only for values it
+    cannot serialize itself."""
+    if isinstance(value, (bytes, bytearray, memoryview)):
+        return value.hex()
+    raise TypeError(f"{type(value).__name__} is not JSON serializable")
+
+
 def _execute_sql(adapter: DatabaseAdapter, guardrails: Guardrails, sql: str) -> str:
     blocked = guard_sql(sql, guardrails.read_only)
     if blocked:
@@ -100,7 +109,7 @@ def _execute_sql(adapter: DatabaseAdapter, guardrails: Guardrails, sql: str) -> 
         summary = f"truncated to {r['rowCount']} rows"
     else:
         summary = f"{r['rowCount']} rows"
-    payload = json.dumps({"columns": r["columns"], "rows": r["rows"]}, separators=(",", ":"))
+    payload = json.dumps({"columns": r["columns"], "rows": r["rows"]}, separators=(",", ":"), default=_json_default)
     return f"{summary}\n{payload}"
 
 
